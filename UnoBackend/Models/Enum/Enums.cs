@@ -29,6 +29,6 @@ public enum CardValue
 
 public enum GameDirection
 {
-    Clockwise,
-    CounterClockwise
+    Clockwise = 1,
+    CounterClockwise = -1
 }
