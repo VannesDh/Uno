@@ -60,9 +60,9 @@ public class Game{
         {
             // Win
         }
-        CheckPlayedCard(card);
-        DiscardCard(card);
 
+        CheckPlayedCard(card);
+        _cardInHand[_players[_currentPlayerIndex]].Remove(card);
         NextPlayer(_turnSkipped);
         
     }
@@ -150,8 +150,7 @@ public class Game{
             SpecialCardPlayed(card);
         }
         
-        _discardedPile.DiscardedCards.Push(_deck.DeckPiles.Pop());
-        
+       DiscardCard(card);
     }
     private void SpecialCardPlayed(ICard card)
     {
@@ -275,6 +274,10 @@ public class Game{
     
         Stack<ICard> filledDeck = new(cards);
         return filledDeck;   
+    }
+    public List<ICard> GetDeck()
+    {
+        return _deck.DeckPiles.ToList();
     }
     private void Shuffle(List<ICard> cards)
     {
