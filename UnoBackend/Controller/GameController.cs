@@ -1,5 +1,8 @@
+using System.Drawing;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using UnoBackend.DTOs;
+using UnoBackend.Interfaces;
 using UnoBackend.Models;
 using UnoBackend.Services;
 
@@ -22,16 +25,45 @@ public class GameController : ControllerBase
         _game.Play();
         DeckDto deck = new()
         {
-            Cards = _game.GetDeck()
-                .Select(card => new CardDto
-                {
-                    Color = card.Color.ToString(),
-                    Value = card.CardValue.ToString()
-                })
-                .ToList()
+            CardCount = _game.GetDeckCount()
         };
-        
-        return Ok(deck);
+
+        IPlayer player = _game.GetCurrentPlayer();
+        PlayerDto playerDto = new();
+        playerDto.PlayerName = player.Name;
+
+        List<CardDto> playerCards = _game.GetPlayerCard(player)
+        .Select(card => new CardDto
+        {
+            Color = card.Color.ToString(),
+            Value = card.CardValue.ToString()
+        })
+        .ToList();
+
+        HandDto playerHand = new()
+        {
+            Cards = playerCards
+        };
+
+        ICard card =  _game.GetCurrentTopPile();
+
+        DiscardPileDto discardPile = new()
+        {
+          LastCardInDiscardPile = new()
+          {
+            Color = card.Color.ToString(),
+            Value = card.CardValue.ToString()    
+          }
+        };
+
+         InitialDataDto initialData = new()
+            {
+                DeckCount = deck,
+                Hand = playerHand,
+                DiscardPile = discardPile,
+                Player = playerDto
+            };
+        return Ok(initialData);
     }
 
 }

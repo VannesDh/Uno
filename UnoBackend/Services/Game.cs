@@ -12,6 +12,7 @@ public class Game{
     private IPlayer _testPlayer3 = new Player("Ai");
     // additional for the plus  
     private int _pendingDraw = 0;
+    private bool _hasStart = false;
     private Color? _chosenColor = null;
     private bool _waitingForColor = false;
     private List<IPlayer> _players = [];
@@ -41,8 +42,11 @@ public class Game{
         }
         else
         {
-            DistributeCards();
-
+            if (!_hasStart)
+            {
+                DistributeCards();
+                _hasStart = true;
+            }
             while(_discardedPile.DiscardedCards.Count == 0)
             {
                 CheckPlayedCard(_deck.DeckPiles.Pop());
@@ -64,7 +68,6 @@ public class Game{
         CheckPlayedCard(card);
         _cardInHand[_players[_currentPlayerIndex]].Remove(card);
         NextPlayer(_turnSkipped);
-        
     }
 
     public bool CheckIfWinner(IPlayer player)
@@ -203,7 +206,7 @@ public class Game{
                 // });
             }
     }
-    private ICard GetCurrentTopPile()
+    public ICard GetCurrentTopPile()
     {
         return _discardedPile.DiscardedCards.Peek();
     }
@@ -233,6 +236,15 @@ public class Game{
         _callUno.Add(newPlayer,false);
     }
 
+    public List<ICard> GetPlayerCard(IPlayer player)
+    {
+        return _cardInHand[player].ToList();
+    }
+
+    public IPlayer GetCurrentPlayer()
+    {
+        return _players[_currentPlayerIndex];
+    }
     #endregion
 
     #region Cards Related
@@ -275,9 +287,9 @@ public class Game{
         Stack<ICard> filledDeck = new(cards);
         return filledDeck;   
     }
-    public List<ICard> GetDeck()
+    public int GetDeckCount()
     {
-        return _deck.DeckPiles.ToList();
+        return _deck.DeckPiles.Count;
     }
     private void Shuffle(List<ICard> cards)
     {
@@ -303,22 +315,23 @@ public class Game{
     {
         _cardInHand[player].Add(_deck.DeckPiles.Pop());
     }
-    private void DistributeCards()
-    {
-        int initialDraw = 7;
-        for (int i = 0; i < _players.Count(); i++)
-        {
-            IPlayer player = _players[i]; 
-            List<ICard> initialCard = []; 
-            for (int j = 0; j < initialDraw ; j++)
-            {
-                ICard currCard = _deck.DeckPiles.Pop();
-                initialCard.Add(new Card(currCard.Color,currCard.CardValue));
-            }
-            _cardInHand.Add(player,initialCard);
-        }
-    }
+private void DistributeCards()
+{
+    Console.WriteLine($"Players: {_players.Count}");
+    Console.WriteLine($"Hands before: {_cardInHand.Count}");
 
- 
+    for (int i = 0; i < _players.Count; i++)
+    {
+        IPlayer player = _players[i];
+        List<ICard> initialCard = [];
+
+        for (int j = 0; j < 7; j++)
+        {
+            initialCard.Add(_deck.DeckPiles.Pop());
+        }
+
+        _cardInHand.Add(player, initialCard);
+    }
+}
     #endregion
 }

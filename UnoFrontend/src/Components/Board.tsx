@@ -1,4 +1,5 @@
 import type { DeckDto } from "../Types/Game";
+import Hand from "./Hand";
 
 interface BoardProps {
   deck: DeckDto;
@@ -7,8 +8,13 @@ interface BoardProps {
 function Board({ deck }: BoardProps) {
   return (
     <div>
-      Cards remaining: {deck.cards.length}
+      <div>
+        Cards remaining: {deck.cardCount}
+      </div>
+
     </div>
+
+    
   );
 }
 

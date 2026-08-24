@@ -1,17 +1,15 @@
+import type { HandDto } from "../Types/Game";
 import Card from "./Card";
 import "./Hand.css";
 
 interface HandProps {
-  cards: {
-    color: string;
-    value: string;
-  }[];
+  cards : HandDto
 }
 
 function Hand({ cards }: HandProps) {
   return (
     <div className="hand">
-      {cards.map((card, index) => (
+      {cards.cards.map((card,index) => (
         <Card
           key={index}
           color={card.color}
