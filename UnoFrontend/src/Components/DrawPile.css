@@ -1,0 +1,22 @@
+#deckCount{
+    color: rgb(0, 0, 0);
+    border-style: dashed;
+    border-color: rgba(0, 0, 0, 0);
+    position:relative;
+    top: -215px;
+    align-content: center;
+}
+
+button {
+    background: rgb(10, 10, 10);
+    color: rgb(213, 213, 213);
+    border-radius: 12px;
+    padding: 15px;
+    border: none;
+}
+
+#drawBtn{
+    position: relative;
+    top: -50px;
+    color: white;
+}

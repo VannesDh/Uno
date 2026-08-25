@@ -1,13 +1,14 @@
 .board {
-  width: 500px;
-  height: 400px;
-
-  border: 3px dashed white;
-  border-radius: 20px;
-
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
 
   margin: 50px auto;
+}
+
+.pile-container{
+  display: flex;
+  flex-direction: row; 
+  gap: 100px;
 }

@@ -66,4 +66,10 @@ public class GameController : ControllerBase
         return Ok(initialData);
     }
 
+    public IActionResult Draw()
+    {
+
+        
+        return Ok();
+    }
 }
