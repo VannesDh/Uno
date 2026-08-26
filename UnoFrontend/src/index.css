@@ -69,6 +69,14 @@ body {
   background-repeat: no-repeat;
 }
 
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+
 h1,
 h2 {
   font-family: var(--heading);

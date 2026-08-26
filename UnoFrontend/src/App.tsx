@@ -1,8 +1,9 @@
 import { useState } from "react";
 import Board from "./Components/Board";
-import { CheckPlayerCardPlayability, Draw, Play, PlayCard } from "./Services/GameApi";
+import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn } from "./Services/GameApi";
 import type { CardDto, DeckDto, DiscardPileDto, HandDto, PlayerDto } from "./Types/Game";
 import Hand from "./Components/Hand";
+import "./App.css";
 
 function App() {
   const [deck, setDeck] = useState<DeckDto | null>(null);
@@ -13,6 +14,7 @@ function App() {
   const [hasDrawn, setHasDrawn] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playableCardIds, setPlayableCardIds] = useState<string[]>([]);
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
 
 
@@ -26,9 +28,10 @@ function App() {
       setCurrentCards(data.hand);
       setTopPile(data.discardPile)
       setCurrentPlayer(data.currentPlayer)
+
       const playableIds = await CheckPlayerCardPlayability();
-      console.log(playableCardIds)
       setPlayableCardIds(playableIds);
+
     } catch (error) {
       console.error(error);
     }
@@ -44,31 +47,75 @@ function App() {
       if (deck?.cardCount == 0) {
 
       }
-      const data = await Draw();
-      setHasDrawn(true);
-      setDeck(prev => ({
-        ...prev!,
-        cardCount: data.deckCount
-      }));
 
-      setCurrentCards(prev => ({
-        ...prev!,
-        cards: [...prev!.cards, data.card]
-      }));
+      if (!hasDrawn && !hasPlayed) {
+        const data = await Draw();
+        setHasDrawn(true);
+        setDeck(prev => ({
+          ...prev!,
+          cardCount: data.deckCount
+        }));
+
+        setCurrentCards(prev => ({
+          ...prev!,
+          cards: [...prev!.cards, data.card]
+        }));
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Handling card drop to the discard pile
-  const handlePlayCard = async (card: CardDto) => {
+  const handleChooseColor = async (color: string) => {
     try {
-      const data = await PlayCard(card);
-      setCurrentCards(data.hand);
-      setTopPile(data.discardPile);
+      await ChooseColor(color);
+
+      setShowColorPicker(false);
 
       const playableIds = await CheckPlayerCardPlayability();
       setPlayableCardIds(playableIds);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleEndTurn = async () => {
+    try {
+      if (hasPlayed || hasDrawn) {
+
+        const data = await EndTurn();
+        setCurrentPlayer(data.player);
+        setCurrentCards(data.hand)
+
+        const playableIds = await CheckPlayerCardPlayability();
+
+        setPlayableCardIds(playableIds);
+
+        setHasDrawn(false);
+        setHasPlayed(false);
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // Handling card drop to the discard pile
+  const handlePlayCard = async (card: CardDto) => {
+    try {
+      if (!hasPlayed) {
+        const data = await PlayCard(card);
+        setCurrentCards(data.hand);
+        setTopPile(data.discardPile);
+
+        const playableIds = await CheckPlayerCardPlayability();
+        setPlayableCardIds(playableIds);
+        setHasPlayed(true);
+
+        if (card.value === "Wild" || card.value === "PlusFour") {
+          setShowColorPicker(true);
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -76,6 +123,13 @@ function App() {
 
   return (
     <div>
+      <div>
+        current Player : {currentPlayer?.playerName}
+      </div>
+
+      <button onClick={handleEndTurn}>
+        End Turn
+      </button>
       <Board
         deck={deck!}
         discardPile={topPile!}
@@ -83,16 +137,37 @@ function App() {
         hasDrawn={hasDrawn}
         onPlayCard={handlePlayCard}
       />
+
       <Hand
         cards={currentCards!}
         playableCardIds={playableCardIds}
       />
+
+      {showColorPicker && (
+        <div className="color-picker-overlay">
+          <div className="color-picker">
+            <h2>Choose a Color</h2>
+
+            <button onClick={() => handleChooseColor("Red")}>
+              Red
+            </button>
+
+            <button onClick={() => handleChooseColor("Blue")}>
+              Blue
+            </button>
+
+            <button onClick={() => handleChooseColor("Green")}>
+              Green
+            </button>
+
+            <button onClick={() => handleChooseColor("Yellow")}>
+              Yellow
+            </button>
+          </div>
+        </div>
+      )}
     </div>
-
   );
-
-
-
 }
 
 export default App;

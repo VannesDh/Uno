@@ -52,3 +52,38 @@ export async function PlayCard(card: CardDto) {
 
   return response.json();
 }
+
+export async function ChooseColor(color: string) {
+  const response = await fetch(
+    "http://localhost:5172/api/game/chooseColor",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(color),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to choose color");
+  }
+}
+
+export async function EndTurn() {
+  const response = await fetch(
+    "http://localhost:5172/api/game/endTurn",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to end turn");
+  }
+
+  return response.json();
+}

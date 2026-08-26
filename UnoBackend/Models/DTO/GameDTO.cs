@@ -52,3 +52,9 @@ public class DrawResponseDto
     public CardDto Card { get; set; } = null!;
     public int DeckCount { get; set; }
 }
+
+public class EndDto
+{
+    public PlayerDto? Player {get; set;} = null;
+    public HandDto Hand {get; set;}
+}

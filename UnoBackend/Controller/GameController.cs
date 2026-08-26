@@ -3,8 +3,9 @@ using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using UnoBackend.DTOs;
 using UnoBackend.Interfaces;
-using UnoBackend.Models;
+using UnoBackend.Models.Enum;
 using UnoBackend.Services;
+using Color = UnoBackend.Models.Enum.Color;
 
 namespace UnoBackend.Controller;
 
@@ -112,9 +113,7 @@ public class GameController : ControllerBase
 
         _game.PlayCard(actualCard);
 
-        IPlayer currentPlayer = _game.GetCurrentPlayer();
-
-        List<CardDto> playerCards = _game.GetPlayerCard(currentPlayer)
+        List<CardDto> playerCards = _game.GetPlayerCard(player)
             .Select(card => new CardDto
             {
                 Id = card.Id,
@@ -144,4 +143,44 @@ public class GameController : ControllerBase
         });
     }
 
+    [HttpPost("chooseColor")]
+    public IActionResult ChooseColor([FromBody] string color)
+    {
+        if (!Enum.TryParse<Color>(color, true, out Color chosenColor))
+        {
+            return BadRequest("Invalid color.");
+        }
+        _game.ChooseColor(chosenColor);
+        return Ok();
+    }
+
+    [HttpPost("endTurn")]
+    public IActionResult EndTurn()
+    {
+        _game.EndTurn();
+
+        IPlayer player = _game.GetCurrentPlayer();
+        PlayerDto current = new();
+        current.PlayerName = player.Name;
+    
+
+        List<CardDto> playerCards = _game.GetPlayerCard(player)
+            .Select(card => new CardDto
+            {
+                Id = card.Id,
+                Color = card.Color.ToString(),
+                Value = card.CardValue.ToString()
+            })
+            .ToList();
+
+        HandDto handDto = new()
+        {
+            Cards = playerCards
+        };
+        return Ok(new EndDto
+        {
+            Player = current,
+            Hand = handDto
+        });
+    }
 }
