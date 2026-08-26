@@ -59,15 +59,17 @@ public class Game{
 
     public void PlayCard(ICard card)
     {
-
+        Console.WriteLine("He");
         if (CheckIfWinner(_players[_currentPlayerIndex]))
         {
             // Win
         }
-
-        CheckPlayedCard(card);
-        _cardInHand[_players[_currentPlayerIndex]].Remove(card);
-        NextPlayer(_turnSkipped);
+        if (CheckCardPlayability(card))
+        {
+            CheckPlayedCard(card);
+            _cardInHand[_players[_currentPlayerIndex]].Remove(card);
+             NextPlayer(_turnSkipped);
+        }
     }
 
     public bool CheckIfWinner(IPlayer player)
@@ -91,15 +93,16 @@ public class Game{
         PlayerTurn(_players[_currentPlayerIndex]);
 
     }
-    public List<int> CheckPlayableCard(IPlayer player)
+    public List<Guid> CheckPlayableCard(IPlayer player)
     {
         List<ICard> cards = _cardInHand[player];
-        List<int> playableCards = [];
-        for (int i = 0; i < cards.Count; i++)
+        List<Guid> playableCards = [];
+
+        foreach (ICard card in cards)
         {
-            if (CheckCardPlayability(cards[i]))
+            if (CheckCardPlayability(card))
             {
-                playableCards.Add(i);
+                playableCards.Add(card.Id);
             }
         }
         return playableCards;
@@ -138,6 +141,7 @@ public class Game{
     }
     private void CheckPlayedCard(ICard card)
     {
+
         if(card.CardValue == CardValue.PlusFour && _discardedPile.DiscardedCards.Count == 0)
         {
             _deck.DeckPiles.Push(card);
@@ -241,10 +245,15 @@ public class Game{
         return _cardInHand[player].ToList();
     }
 
-    public IPlayer GetCurrentPlayer()
-    {
-        return _players[_currentPlayerIndex];
-    }
+public IPlayer GetCurrentPlayer()
+{
+    IPlayer player = _players[_currentPlayerIndex];
+
+    Console.WriteLine($"Current player: {player.Name}");
+    Console.WriteLine($"Player object: {player.GetHashCode()}");
+
+    return player;
+}
     #endregion
 
     #region Cards Related
@@ -311,15 +320,14 @@ public class Game{
         _deck.DeckPiles = new Stack<ICard>(cards);
     }
 
-    public void DrawCard(IPlayer player)
+    public ICard DrawCard(IPlayer player)
     {
-        _cardInHand[player].Add(_deck.DeckPiles.Pop());
+        ICard card = _deck.DeckPiles.Pop();
+        _cardInHand[player].Add(card);
+        return card;
     }
 private void DistributeCards()
 {
-    Console.WriteLine($"Players: {_players.Count}");
-    Console.WriteLine($"Hands before: {_cardInHand.Count}");
-
     for (int i = 0; i < _players.Count; i++)
     {
         IPlayer player = _players[i];

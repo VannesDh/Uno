@@ -11,3 +11,19 @@
   user-select: none;
   -webkit-user-drag: none;
 }
+
+.card.playable {
+  outline: 3px solid #ede606;
+  outline-offset: -14px;
+  animation: playablePulse 1s ease-in-out infinite;
+}
+
+@keyframes playablePulse {
+  0%, 100% {
+    outline-color: rgb(255, 255, 0);
+  }
+
+  50% {
+    outline-color: transparent;
+  }
+}

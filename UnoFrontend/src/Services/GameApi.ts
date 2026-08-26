@@ -1,8 +1,53 @@
+import type { CardDto } from "../Types/Game";
+
 export async function Play() {
   const response = await fetch("http://localhost:5172/api/game/play");
 
   if (!response.ok) {
     throw new Error("Failed to fetch deck");
+  }
+
+  return response.json();
+}
+
+export async function CheckPlayerCardPlayability() {
+  const response = await fetch("http://localhost:5172/api/game/checkPlayability");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch deck");
+  }
+
+  return response.json();
+}
+
+export async function Draw() {
+  const response = await fetch("http://localhost:5172/api/game/draw", {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to draw card");
+  }
+
+  return response.json();
+}
+
+export async function PlayCard(card: CardDto) {
+  const response = await fetch(
+    "http://localhost:5172/api/game/playCard",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(card),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.log("Backend:", error);
+    throw new Error("Failed to play card");
   }
 
   return response.json();

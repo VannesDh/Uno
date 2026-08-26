@@ -4,16 +4,19 @@ import "./Hand.css";
 
 interface HandProps {
   cards : HandDto
+  playableCardIds : string[]
 }
 
-function Hand({ cards }: HandProps) {
+function Hand({ cards, playableCardIds }: HandProps) {
   return (
     <div className="hand">
-      {cards.cards.map((card,index) => (
+      {cards.cards.map((card) => (
         <Card
-          key={index}
+          key={card.id}
+          id = {card.id}
           color={card.color}
           value={card.value}
+          playable={playableCardIds.includes(card.id)}
         />
       ))}
     </div>

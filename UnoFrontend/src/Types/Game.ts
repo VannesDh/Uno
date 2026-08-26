@@ -1,4 +1,5 @@
 export interface CardDto {
+  id :string;
   color: string;
   value: string;
 }

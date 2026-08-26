@@ -4,6 +4,7 @@ using UnoBackend.Models.Enum;
 namespace UnoBackend.Models;
 public class Card : ICard
 {
+    public Guid Id { get; } = Guid.NewGuid();
     public Color Color {get; }
     public CardValue CardValue {get;}
 
@@ -12,6 +13,13 @@ public class Card : ICard
         Color = color;
         CardValue = cardValue;
     }
+    public Card(Guid id, Color color, CardValue cardValue)
+    {
+        Id = id;
+        Color = color;
+        CardValue = cardValue;
+    }
+
 }
 
 

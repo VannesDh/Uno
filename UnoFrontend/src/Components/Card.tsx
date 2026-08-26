@@ -10,11 +10,14 @@ const cardImages = import.meta.glob(
 );
 
 interface CardProps {
+  id : string
   color: string;
   value: string;
+  playable: boolean;
+
 }
 
-function Card({ color, value }: CardProps) {
+function Card({id, color, value, playable }: CardProps) {
   const fileName = `${color}_${value}.png`;
   const imagePath = `../Assets/PixelArtAssets-main/UnoCards/${fileName}`;
 
@@ -22,13 +25,15 @@ function Card({ color, value }: CardProps) {
 
   return (
     <div
-      className="card"
+      className={`card ${playable ? "playable" : "notPlayable"}`}
       draggable
       onDragStart={(event) => {
         event.dataTransfer.setData(
-          "card",
-          JSON.stringify({ color, value })
-        );
+        "card",
+        JSON.stringify({
+          id,color,value
+        })
+      );
       }}
     >
       <img src={image} alt={`${color} ${value}`} />
