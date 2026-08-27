@@ -20,7 +20,7 @@ public enum CardValue
     Seven,
     Eight,
     Nine,
-    Skip,
+     Skip,
     Reverse,
     PlusTwo,
     PlusFour,

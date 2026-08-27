@@ -9,7 +9,17 @@ export async function Play() {
 
   return response.json();
 }
+export async function RestartGame() {
+  const response = await fetch("http://localhost:5172/api/game/restart", {
+    method: "POST",
+  });
 
+  if (!response.ok) {
+    throw new Error("Failed to restart game");
+  }
+
+  return response.json();
+}
 export async function CheckPlayerCardPlayability() {
   const response = await fetch("http://localhost:5172/api/game/checkPlayability");
 

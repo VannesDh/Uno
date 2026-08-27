@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Board from "./Components/Board";
-import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn, CallUno, AddPlayer } from "./Services/GameApi";
+import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn, CallUno, AddPlayer, RestartGame } from "./Services/GameApi";
 import type { CardDto, DeckDto, DiscardPileDto, HandDto, PlayerDto } from "./Types/Game";
 import Hand from "./Components/Hand";
 import "./App.css";
@@ -18,6 +18,7 @@ function App() {
   const [GameWinner, setGameWinner] = useState(false);
   const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState("")
+  const [mustPlayDrawnCard, setMustPlayDrawnCard] = useState(false);
 
   // Handling play button
   const handlePlay = async () => {
@@ -94,29 +95,64 @@ function App() {
   }
 
   // handling drawing card
-  const handleDraw = async () => {
-    try {
-      if (deck?.cardCount == 0) {
+const handleDraw = async () => {
+  try {
+    if (!hasDrawn && !hasPlayed) {
+      const data = await Draw();
 
+      setHasDrawn(true);
+
+      setDeck(prev => ({
+        ...prev!,
+        cardCount: data.deckCount
+      }));
+
+      setCurrentCards(prev => ({
+        ...prev!,
+        cards: [...prev!.cards, data.card]
+      }));
+
+      const playableIds = await CheckPlayerCardPlayability();
+
+      if (playableIds.includes(data.card.id)) {
+        // Drawn card is playable → MUST play it
+        setPlayableCardIds([data.card.id]);
+        setMustPlayDrawnCard(true);
+      } else {
+        // Drawn card isn't playable → can end turn
+        setPlayableCardIds([]);
+        setMustPlayDrawnCard(false);
       }
-
-      if (!hasDrawn && !hasPlayed) {
-        const data = await Draw();
-        setHasDrawn(true);
-        setDeck(prev => ({
-          ...prev!,
-          cardCount: data.deckCount
-        }));
-
-        setCurrentCards(prev => ({
-          ...prev!,
-          cards: [...prev!.cards, data.card]
-        }));
-      }
-    } catch (error) {
-      console.error(error);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handlePlayAgain = async () => {
+  setShowColorPicker(false);
+  try {
+    const data = await RestartGame();
+
+    setGameWinner(false);
+    setHasDrawn(false);
+    setHasPlayed(false);
+    setPlayableCardIds([]);
+    setDeck(data.deckCount);
+    setCurrentCards(data.hand);
+    setTopPile(data.discardPile);
+    setCurrentPlayer(data.player);
+
+    if (data.waitingForColor) {
+      setShowColorPicker(true);
+    }
+    const playableIds = await CheckPlayerCardPlayability();
+    setPlayableCardIds(playableIds);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const handleChooseColor = async (color: string) => {
     try {
@@ -163,6 +199,7 @@ function App() {
         setCurrentCards(data.hand);
         setTopPile(data.discardPile);
         setHasPlayed(true);
+        setMustPlayDrawnCard(false);
         setPlayableCardIds([]);
         setGameWinner(data.gameWinner);
 
@@ -197,6 +234,7 @@ function App() {
         <button
           className="end-turn-btn"
           onClick={handleEndTurn}
+          disabled={mustPlayDrawnCard}
         >
           END TURN
         </button>
@@ -263,7 +301,7 @@ function App() {
               </p>
 
               <div className="winner-buttons">
-                <button className="play-again-btn">
+                <button className="play-again-btn" onClick={handlePlayAgain}>
                   PLAY AGAIN
                 </button>
 

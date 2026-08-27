@@ -1,5 +1,3 @@
-using System.Drawing;
-using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using UnoBackend.DTOs;
 using UnoBackend.Interfaces;
@@ -20,27 +18,32 @@ public class GameController : ControllerBase
         _game = game;
     }
 
+
     [HttpGet("play")]
     public IActionResult Play()
     {
         _game.Play();
+
         DeckDto deck = new()
         {
             CardCount = _game.GetDeckCount()
         };
 
         IPlayer player = _game.GetCurrentPlayer();
-        PlayerDto playerDto = new();
-        playerDto.PlayerName = player.Name;
+
+        PlayerDto playerDto = new()
+        {
+            PlayerName = player.Name
+        };
 
         List<CardDto> playerCards = _game.GetPlayerCard(player)
-        .Select(card => new CardDto
-        {
-            Id = card.Id,
-            Color = card.Color.ToString(),
-            Value = card.CardValue.ToString()
-        })
-        .ToList();
+            .Select(card => new CardDto
+            {
+                Id = card.Id,
+                Color = card.Color.ToString(),
+                Value = card.CardValue.ToString()
+            })
+            .ToList();
 
         HandDto playerHand = new()
         {
@@ -51,7 +54,7 @@ public class GameController : ControllerBase
 
         DiscardPileDto discardPile = new()
         {
-            LastCardInDiscardPile = new()
+            LastCardInDiscardPile = new CardDto
             {
                 Id = card.Id,
                 Color = card.Color.ToString(),
@@ -67,13 +70,16 @@ public class GameController : ControllerBase
             Player = playerDto,
             WaitingForColor = _game.WaitingForColor()
         };
+
         return Ok(initialData);
     }
+
 
     [HttpPost("draw")]
     public IActionResult Draw()
     {
         IPlayer player = _game.GetCurrentPlayer();
+
         ICard card = _game.DrawCard(player);
 
         CardDto drawnCard = new()
@@ -90,11 +96,14 @@ public class GameController : ControllerBase
         });
     }
 
+
     [HttpGet("checkPlayability")]
     public IActionResult CheckPlayerCardPlayability()
     {
         IPlayer player = _game.GetCurrentPlayer();
+
         List<Guid> listOfIds = _game.CheckPlayableCard(player);
+
         return Ok(listOfIds);
     }
 
@@ -117,8 +126,18 @@ public class GameController : ControllerBase
             return BadRequest("Card cannot be played.");
         }
 
-        bool winner = _game.PlayCard(actualCard);
-        Console.WriteLine("The winner is " + winner);
+        // PlayCard now uses the winner callback
+        _game.PlayCard(actualCard);
+
+        // Get winner from the Game
+        IPlayer? winner = _game.GetWinner();
+
+        Console.WriteLine(
+            winner != null
+                ? $"The winner is {winner.Name}"
+                : "There is no winner yet"
+        );
+
         List<CardDto> playerCards = _game.GetPlayerCard(player)
             .Select(card => new CardDto
             {
@@ -132,7 +151,8 @@ public class GameController : ControllerBase
 
         return Ok(new PlayCardResponseDto
         {
-            GameWinner = winner,
+            GameWinner = winner != null,
+
             Hand = new HandDto
             {
                 Cards = playerCards
@@ -150,6 +170,7 @@ public class GameController : ControllerBase
         });
     }
 
+
     [HttpPost("chooseColor")]
     public IActionResult ChooseColor([FromBody] string color)
     {
@@ -157,9 +178,12 @@ public class GameController : ControllerBase
         {
             return BadRequest("Invalid color.");
         }
+
         _game.ChooseColor(chosenColor);
+
         return Ok();
     }
+
 
     [HttpPost("addPlayer")]
     public IActionResult AddPlayer([FromBody] PlayerDto player)
@@ -169,15 +193,76 @@ public class GameController : ControllerBase
         return Ok();
     }
 
+
+    [HttpPost("restart")]
+    public IActionResult RestartGame()
+    {
+        _game.ResetGame();
+
+        _game.Play();
+
+        DeckDto deck = new()
+        {
+            CardCount = _game.GetDeckCount()
+        };
+
+        IPlayer player = _game.GetCurrentPlayer();
+
+        PlayerDto playerDto = new()
+        {
+            PlayerName = player.Name
+        };
+
+        List<CardDto> playerCards = _game.GetPlayerCard(player)
+            .Select(card => new CardDto
+            {
+                Id = card.Id,
+                Color = card.Color.ToString(),
+                Value = card.CardValue.ToString()
+            })
+            .ToList();
+
+        HandDto playerHand = new()
+        {
+            Cards = playerCards
+        };
+
+        ICard card = _game.GetCurrentTopPile();
+
+        DiscardPileDto discardPile = new()
+        {
+            LastCardInDiscardPile = new CardDto
+            {
+                Id = card.Id,
+                Color = card.Color.ToString(),
+                Value = card.CardValue.ToString()
+            }
+        };
+
+        InitialDataDto initialData = new()
+        {
+            DeckCount = deck,
+            Hand = playerHand,
+            DiscardPile = discardPile,
+            Player = playerDto,
+            WaitingForColor = _game.WaitingForColor()
+        };
+
+        return Ok(initialData);
+    }
+
+
     [HttpPost("endTurn")]
     public IActionResult EndTurn()
     {
         _game.EndTurn();
 
         IPlayer player = _game.GetCurrentPlayer();
-        PlayerDto current = new();
-        current.PlayerName = player.Name;
-    
+
+        PlayerDto current = new()
+        {
+            PlayerName = player.Name
+        };
 
         List<CardDto> playerCards = _game.GetPlayerCard(player)
             .Select(card => new CardDto
@@ -192,6 +277,7 @@ public class GameController : ControllerBase
         {
             Cards = playerCards
         };
+
         return Ok(new EndDto
         {
             Player = current,
@@ -199,10 +285,12 @@ public class GameController : ControllerBase
         });
     }
 
+
     [HttpPost("callUno")]
     public IActionResult CallUno()
     {
         IPlayer player = _game.GetCurrentPlayer();
+
         _game.CallUno(player);
 
         return Ok();
