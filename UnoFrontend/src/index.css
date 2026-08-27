@@ -64,7 +64,7 @@
 body {
   margin: 0;
   background-image: url("./Assets/boardBg.png");
-  background-size: contain;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }

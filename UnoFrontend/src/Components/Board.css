@@ -1,14 +1,113 @@
+/* =========================================================
+   BOARD
+   ========================================================= */
+
 .board {
+  width: 100%;
+
   display: flex;
-  flex-direction: row;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   PILES
+   ========================================================= */
+
+.pile-container {
+  display: flex;
+
+  justify-content: center;
+  align-items: flex-start;
+  gap: 45px;
+
+  margin-top: 10px;
+}
+
+
+/* Individual pile */
+
+.pile {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: flex-start;
+}
+
+
+/* =========================================================
+   PILE TITLES
+   ========================================================= */
+
+.pile-title {
+  margin: 0 0 8px;
+
+  color: white;
+
+  font-size: 13px;
+
+  font-weight: bold;
+
+  letter-spacing: 2px;
+
+  text-transform: uppercase;
+
+  text-shadow:
+    2px 2px 0 #7c0000;
+}
+
+
+/* =========================================================
+   DISCARD DROP ZONE
+   ========================================================= */
+
+.discard-drop-zone {
+  width: 95px;
+  height: 135px;
+
+  display: flex;
+
   justify-content: center;
   align-items: center;
 
-  margin: 50px auto;
+  border-radius: 10px;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.pile-container{
-  display: flex;
-  flex-direction: row; 
-  gap: 100px;
+
+/* When dragging a card over discard pile */
+
+.discard-drop-zone:hover {
+  background: rgba(255, 255, 255, 0.05);
+
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .pile-container {
+    gap: 20px;
+  }
+
+  .pile-title {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .discard-drop-zone {
+    width: 80px;
+    height: 115px;
+  }
 }

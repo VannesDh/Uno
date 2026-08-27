@@ -13,7 +13,7 @@ export interface HandDto {
 }
 
 export interface PlayerDto {
-  playerId: number;
+  // playerId: number;
   playerName: string;
 }
 
@@ -21,9 +21,10 @@ export interface DiscardPileDto {
   lastCardInDiscardPile: CardDto;
 }
 
-export interface InitialDataDto {
-  deck: DeckDto;
-  hand: HandDto;
-  player: PlayerDto;
-  discardPile: DiscardPileDto;
-}
+// export interface InitialDataDto {
+//   deck: DeckDto;
+//   hand: HandDto;
+//   player: PlayerDto;
+//   discardPile: DiscardPileDto;
+
+// }

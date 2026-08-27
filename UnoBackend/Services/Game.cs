@@ -8,10 +8,6 @@ namespace UnoBackend.Services;
 
 public class Game
 {
-
-    private IPlayer _testPlayer1 = new Player("Josh");
-    private IPlayer _testPlayer2 = new Player("Kanna");
-    private IPlayer _testPlayer3 = new Player("Ai");
     // additional for the plus  
     private int _pendingDraw = 0;
     private bool _hasStart = false;
@@ -29,29 +25,55 @@ public class Game
     public Game()
     {
         _deck = new Deck(InitializeCards());
-        _players = [_testPlayer1, _testPlayer2, _testPlayer3];
-        _callUno.Add(_testPlayer1, false);
-        _callUno.Add(_testPlayer2, false);
-        _callUno.Add(_testPlayer3, false);
-
         _currentPlayerIndex = 0;
     }
     public void Play()
     {
         if (_players.Count < 2)
         {
-            Console.WriteLine("Cannot la bro");
+            Console.WriteLine("Cannot start game");
+            return;
         }
-        else
+
+        if (!_hasStart)
         {
-            if (!_hasStart)
+            DistributeCards();
+            _hasStart = true;
+        }
+
+        while (_discardedPile.DiscardedCards.Count == 0)
+        {
+            // ICard card = new Card(Color.Wild, CardValue.Wild);
+            ICard card = _deck.DeckPiles.Pop();
+
+            // Wild Draw Four cannot be the starting card
+            if (card.CardValue == CardValue.PlusFour)
             {
-                DistributeCards();
-                _hasStart = true;
+                _deck.DeckPiles.Push(card);
+
+                List<ICard> cards = _deck.DeckPiles.ToList();
+                Shuffle(cards);
+                _deck.DeckPiles = new Stack<ICard>(cards);
+
+                continue;
             }
-            while (_discardedPile.DiscardedCards.Count == 0)
+
+            // Put the card into discard pile
+            DiscardCard(card);
+
+            // Apply its starting effect
+            if (card.CardValue == CardValue.Reverse ||
+                card.CardValue == CardValue.Skip ||
+                card.CardValue == CardValue.PlusTwo)
             {
-                CheckPlayedCard(_deck.DeckPiles.Pop());
+                SpecialCardPlayed(card);
+            }
+
+            // Wild → first player chooses the color
+            if (card.CardValue == CardValue.Wild)
+            {
+                _waitingForColor = true;
+                return;
             }
         }
     }
@@ -59,31 +81,33 @@ public class Game
 
     #region Discarding, Power Related, and Logic Checking
 
-    public void PlayCard(ICard card)
+    public bool PlayCard(ICard card)
     {
-        Console.WriteLine("He");
-        if (CheckIfWinner(_players[_currentPlayerIndex]))
-        {
-            // Win
-        }
         if (CheckCardPlayability(card))
         {
             CheckPlayedCard(card);
             _cardInHand[_players[_currentPlayerIndex]].Remove(card);
 
-            if (_waitingForColor)
+            if (!_waitingForColor)
             {
-                return;
+                _chosenColor = null;
             }
-            _chosenColor = null;
-          
         }
+
+        if (CheckIfWinner(_players[_currentPlayerIndex]))
+        {
+            Console.WriteLine(_players[_currentPlayerIndex]);
+            return true;
+        }
+
+        return false;
     }
 
     public bool CheckIfWinner(IPlayer player)
     {
         if (_cardInHand[player].Count == 0)
         {
+            Console.Write("nguehehe");
             return true;
         }
         return false;
@@ -116,7 +140,7 @@ public class Game
         return playableCards;
     }
 
-    private bool CheckCardPlayability(ICard card)
+    public bool CheckCardPlayability(ICard card)
     {
         ICard topPile = GetCurrentTopPile();
         if (_chosenColor.HasValue && card.Color == _chosenColor)
@@ -132,16 +156,32 @@ public class Game
 
     public void PlayerTurn(IPlayer player)
     {
-        if (IsUno(player))
-
-            if (_pendingDraw != 0)
+        if (!IsUno(player))
+        {
+            if (_callUno[player])
             {
-                for (int i = 0; i < _pendingDraw; i++)
-                {
-                    DrawCard(player);
-                }
-                _pendingDraw = 0;
+                DrawCard(player);
+                _callUno[player] = false;
+
             }
+        }
+        else if (IsUno(player))
+        {
+            if (!_callUno[player])
+            {
+                DrawCard(player);
+                _callUno[player] = false;
+            }
+        }
+
+        if (_pendingDraw != 0)
+        {
+            for (int i = 0; i < _pendingDraw; i++)
+            {
+                DrawCard(player);
+            }
+            _pendingDraw = 0;
+        }
     }
 
     public void DiscardCard(ICard card)
@@ -151,13 +191,8 @@ public class Game
     private void CheckPlayedCard(ICard card)
     {
 
-        if (card.CardValue == CardValue.PlusFour && _discardedPile.DiscardedCards.Count == 0)
-        {
-            _deck.DeckPiles.Push(card);
-            Shuffle(_deck.DeckPiles.ToList());
-            return;
-        }
-        else if (card.CardValue == CardValue.Skip
+
+        if (card.CardValue == CardValue.Skip
             || card.CardValue == CardValue.Reverse
             || card.CardValue == CardValue.Wild
             || card.CardValue == CardValue.PlusFour
@@ -204,7 +239,10 @@ public class Game
             _waitingForColor = true;
         }
     }
-
+    public bool WaitingForColor()
+    {
+        return _waitingForColor;
+    }
     public void ChooseColor(Color color)
     {
         if (!_waitingForColor)
@@ -233,6 +271,7 @@ public class Game
 
     public void CallUno(IPlayer player)
     {
+        Console.WriteLine($"Player {player} called UNO");
         _callUno[player] = true;
     }
 
@@ -245,6 +284,7 @@ public class Game
         Player newPlayer = new(name);
         _players.Add(newPlayer);
         _callUno.Add(newPlayer, false);
+        Console.WriteLine($"Player Added {name}");
     }
 
     public List<ICard> GetPlayerCard(IPlayer player)
@@ -340,7 +380,7 @@ public class Game
             IPlayer player = _players[i];
             List<ICard> initialCard = [];
 
-            for (int j = 0; j < 7; j++)
+            for (int j = 0; j < 3; j++)
             {
                 initialCard.Add(_deck.DeckPiles.Pop());
             }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Board from "./Components/Board";
-import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn } from "./Services/GameApi";
+import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn, CallUno, AddPlayer } from "./Services/GameApi";
 import type { CardDto, DeckDto, DiscardPileDto, HandDto, PlayerDto } from "./Types/Game";
 import Hand from "./Components/Hand";
 import "./App.css";
@@ -15,9 +15,9 @@ function App() {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playableCardIds, setPlayableCardIds] = useState<string[]>([]);
   const [showColorPicker, setShowColorPicker] = useState(false);
-
-
-
+  const [GameWinner, setGameWinner] = useState(false);
+  const [players, setPlayers] = useState<string[]>([]);
+  const [playerName, setPlayerName] = useState("")
 
   // Handling play button
   const handlePlay = async () => {
@@ -27,8 +27,10 @@ function App() {
       setGameStarted(true);
       setCurrentCards(data.hand);
       setTopPile(data.discardPile)
-      setCurrentPlayer(data.currentPlayer)
-
+      setCurrentPlayer(data.player)
+      if (data.waitingForColor) {
+        setShowColorPicker(true);
+      }
       const playableIds = await CheckPlayerCardPlayability();
       setPlayableCardIds(playableIds);
 
@@ -37,8 +39,58 @@ function App() {
     }
   };
 
+  const handleAddPlayer = async () => {
+    if (!playerName.trim()) return;
+
+    try {
+      const player: PlayerDto = {
+        playerName: playerName
+      }
+      await AddPlayer(player);
+
+      setPlayers(prev => [...prev, playerName]);
+      setPlayerName("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (!gameStarted) {
-    return <button onClick={handlePlay}>Play</button>;
+    return (
+      <div>
+        <div className="player-menu">
+          <h1>UNO</h1>
+
+          <div className="player-name">
+            <h2>Players</h2>
+
+            {players.map((player, index) => (
+              <div className="player-text" key={index}>
+                {player}
+              </div>
+            ))}
+          </div>
+
+          <input
+            className="player-name-input"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            placeholder="Player name"
+          />
+
+          <button onClick={handleAddPlayer}>
+            Add Player
+          </button>
+
+          <button
+            disabled={players.length < 2}
+            onClick={handlePlay}
+          >
+            Start Game
+          </button>
+        </div>
+      </div>
+    )
   }
 
   // handling drawing card
@@ -80,6 +132,8 @@ function App() {
     }
   };
 
+
+  // handling  endturn
   const handleEndTurn = async () => {
     try {
       if (hasPlayed || hasDrawn) {
@@ -100,6 +154,7 @@ function App() {
       console.error(error);
     }
   };
+
   // Handling card drop to the discard pile
   const handlePlayCard = async (card: CardDto) => {
     try {
@@ -107,10 +162,9 @@ function App() {
         const data = await PlayCard(card);
         setCurrentCards(data.hand);
         setTopPile(data.discardPile);
-
-        const playableIds = await CheckPlayerCardPlayability();
-        setPlayableCardIds(playableIds);
         setHasPlayed(true);
+        setPlayableCardIds([]);
+        setGameWinner(data.gameWinner);
 
         if (card.value === "Wild" || card.value === "PlusFour") {
           setShowColorPicker(true);
@@ -121,15 +175,32 @@ function App() {
     }
   };
 
+  // Handle UNO called
+  const handleCallUno = async () => {
+    try {
+      await CallUno()
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <div>
-      <div>
-        current Player : {currentPlayer?.playerName}
-      </div>
+      <div className="game-header">
+        <div className="current-player">
+          <span className="current-player-label">CURRENT PLAYER</span>
+          <span className="current-player-name">
+            {currentPlayer?.playerName}
+          </span>
+        </div>
 
-      <button onClick={handleEndTurn}>
-        End Turn
-      </button>
+        <button
+          className="end-turn-btn"
+          onClick={handleEndTurn}
+        >
+          END TURN
+        </button>
+      </div>
       <Board
         deck={deck!}
         discardPile={topPile!}
@@ -143,6 +214,9 @@ function App() {
         playableCardIds={playableCardIds}
       />
 
+     <button className="uno-btn" onClick={handleCallUno}>
+  UNO!
+</button>
       {showColorPicker && (
         <div className="color-picker-overlay">
           <div className="color-picker">
@@ -166,7 +240,46 @@ function App() {
           </div>
         </div>
       )}
+
+      <div>
+        {GameWinner && (
+          <div className="winner-page">
+            <div className="winner-content">
+
+              <div className="winner-card">
+                <div className="winner-card-inner">
+                  <span>UNO!</span>
+                </div>
+              </div>
+
+              <p className="winner-label">GAME OVER</p>
+
+              <h1>
+                <span>{currentPlayer?.playerName}</span> WINS!
+              </h1>
+
+              <p className="winner-subtitle">
+                Congratulations! You played your last card.
+              </p>
+
+              <div className="winner-buttons">
+                <button className="play-again-btn">
+                  PLAY AGAIN
+                </button>
+
+                <button className="menu-btn">
+                  MAIN MENU
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+      </div>
     </div>
+
+
+
   );
 }
 

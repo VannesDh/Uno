@@ -64,7 +64,8 @@ public class GameController : ControllerBase
             DeckCount = deck,
             Hand = playerHand,
             DiscardPile = discardPile,
-            Player = playerDto
+            Player = playerDto,
+            WaitingForColor = _game.WaitingForColor()
         };
         return Ok(initialData);
     }
@@ -111,8 +112,13 @@ public class GameController : ControllerBase
             return BadRequest("Card is not in player's hand.");
         }
 
-        _game.PlayCard(actualCard);
+        if (!_game.CheckCardPlayability(actualCard))
+        {
+            return BadRequest("Card cannot be played.");
+        }
 
+        bool winner = _game.PlayCard(actualCard);
+        Console.WriteLine("The winner is " + winner);
         List<CardDto> playerCards = _game.GetPlayerCard(player)
             .Select(card => new CardDto
             {
@@ -126,6 +132,7 @@ public class GameController : ControllerBase
 
         return Ok(new PlayCardResponseDto
         {
+            GameWinner = winner,
             Hand = new HandDto
             {
                 Cards = playerCards
@@ -151,6 +158,14 @@ public class GameController : ControllerBase
             return BadRequest("Invalid color.");
         }
         _game.ChooseColor(chosenColor);
+        return Ok();
+    }
+
+    [HttpPost("addPlayer")]
+    public IActionResult AddPlayer([FromBody] PlayerDto player)
+    {
+        _game.AddPlayer(player.PlayerName);
+
         return Ok();
     }
 
@@ -182,5 +197,14 @@ public class GameController : ControllerBase
             Player = current,
             Hand = handDto
         });
+    }
+
+    [HttpPost("callUno")]
+    public IActionResult CallUno()
+    {
+        IPlayer player = _game.GetCurrentPlayer();
+        _game.CallUno(player);
+
+        return Ok();
     }
 }

@@ -11,6 +11,7 @@ public class InitialDataDto
     public HandDto Hand { get; set; } = new();
     public PlayerDto Player { get; set; } = new();
     public DiscardPileDto DiscardPile { get; set; } = new();
+    public bool WaitingForColor { get; set; }
 }
 
 public class DiscardPileDto
@@ -25,7 +26,7 @@ public class DeckDto
 
 public class PlayerDto
 {
-    public int PlayerId { get; set; } = default;
+    // public int PlayerId { get; set; } = default;
     public string PlayerName { get; set; } = "";
 }
 
@@ -45,6 +46,7 @@ public class PlayCardResponseDto
 {
     public HandDto Hand { get; set; }
     public DiscardPileDto DiscardPile { get; set; }
+    public bool GameWinner{get;set;}
 }
 
 public class DrawResponseDto

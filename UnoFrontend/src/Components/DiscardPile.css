@@ -1,0 +1,55 @@
+.discard-pile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 120px;
+  height: 170px;
+}
+
+
+/* =========================
+   DISCARD CARD
+   ========================= */
+
+.discard-card {
+  width: 120px;
+
+  display: block;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  animation: cardAppear 0.25s ease-out;
+}
+
+
+.discard-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
+
+/* =========================
+   CARD APPEAR ANIMATION
+   ========================= */
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) rotate(-3deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
