@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Security.Cryptography;
 using UnoBackend.Interfaces;
 using UnoBackend.Models;
 using UnoBackend.Models.Enum;
@@ -358,17 +356,34 @@ public class Game
     }
     public void RenewDeck()
     {
-        List<ICard> cards = _discardedPile.DiscardedCards
-                            .Take(_discardedPile.DiscardedCards.Count - 1)
-                            .ToList();
+        if (_discardedPile.DiscardedCards.Count <= 1)
+        {
+            return;
+        }
 
+        // The current top card stays in the discard pile
+        ICard topCard = _discardedPile.DiscardedCards.Pop();
+
+        // Everything else goes back into the deck
+        List<ICard> cards = _discardedPile.DiscardedCards.ToList();
+
+        // Shuffle
         Shuffle(cards);
-        _discardedPile.DiscardedCards = new();
+
+        // Restore the top card
+        _discardedPile.DiscardedCards = new Stack<ICard>();
+        _discardedPile.DiscardedCards.Push(topCard);
+
+        // New draw deck
         _deck.DeckPiles = new Stack<ICard>(cards);
     }
 
     public ICard DrawCard(IPlayer player)
     {
+        if (_deck.DeckPiles.Count == 0)
+        {
+            RenewDeck();
+        }
         ICard card = _deck.DeckPiles.Pop();
         _cardInHand[player].Add(card);
         return card;
@@ -380,7 +395,7 @@ public class Game
             IPlayer player = _players[i];
             List<ICard> initialCard = [];
 
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < 7; j++)
             {
                 initialCard.Add(_deck.DeckPiles.Pop());
             }
