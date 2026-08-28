@@ -96,6 +96,13 @@ public class GameController : ControllerBase
         });
     }
 
+    [HttpPost("reset")]
+    public IActionResult Reset()
+    {
+        _game.ResetGame();
+
+        return Ok();
+    }
 
     [HttpGet("checkPlayability")]
     public IActionResult CheckPlayerCardPlayability()
@@ -197,7 +204,7 @@ public class GameController : ControllerBase
     [HttpPost("restart")]
     public IActionResult RestartGame()
     {
-        _game.ResetGame();
+        _game.RestartGame();
 
         _game.Play();
 

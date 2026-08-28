@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Board from "./Components/Board";
-import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn, CallUno, AddPlayer, RestartGame } from "./Services/GameApi";
+import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn, CallUno, AddPlayer, RestartGame, ResetGame } from "./Services/GameApi";
 import type { CardDto, DeckDto, DiscardPileDto, HandDto, PlayerDto } from "./Types/Game";
 import Hand from "./Components/Hand";
 import "./App.css";
@@ -19,6 +19,20 @@ function App() {
   const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState("")
   const [mustPlayDrawnCard, setMustPlayDrawnCard] = useState(false);
+
+  useEffect(() => {
+  const handleUnload = () => {
+    navigator.sendBeacon(
+      "http://localhost:5172/api/game/reset"
+    );
+  };
+
+  window.addEventListener("beforeunload", handleUnload);
+
+  return () => {
+    window.removeEventListener("beforeunload", handleUnload);
+  };
+}, []);
 
   // Handling play button
   const handlePlay = async () => {
@@ -39,6 +53,28 @@ function App() {
       console.error(error);
     }
   };
+
+  const handleMenu = async () => {
+  try {
+    await ResetGame();
+
+    setGameStarted(false);
+    setGameWinner(false);
+    setHasDrawn(false);
+    setHasPlayed(false);
+    setPlayableCardIds([]);
+    setShowColorPicker(false);
+    setMustPlayDrawnCard(false);
+
+    setDeck(null);
+    setTopPile(null);
+    setCurrentCards(null);
+    setCurrentPlayer(null);
+    setPlayers([]);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const handleAddPlayer = async () => {
     if (!playerName.trim()) return;
@@ -305,7 +341,7 @@ const handlePlayAgain = async () => {
                   PLAY AGAIN
                 </button>
 
-                <button className="menu-btn">
+                <button className="menu-btn" onClick={handleMenu}>
                   MAIN MENU
                 </button>
               </div>

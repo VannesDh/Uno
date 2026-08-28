@@ -108,7 +108,7 @@ public class Game
     }
 
 
-    public void ResetGame()
+    public void RestartGame()
     {
         // Reset deck
         _deck = new Deck(InitializeCards());
@@ -139,7 +139,36 @@ public class Game
 
         // Reset winner
         _winner = null;
-    }
+    } 
+    public void ResetGame()
+       {
+        // Reset deck
+        _deck = new Deck(InitializeCards());
+
+        // Reset discard pile
+        _discardedPile = new Discarded();
+
+        // Reset player hands
+        _cardInHand.Clear();
+
+        // Reset UNO states
+        _callUno.Clear();
+
+        _players = new();
+        
+        // Reset game state
+        _pendingDraw = 0;
+        _drawnCard = null;
+        _hasStart = false;
+        _chosenColor = null;
+        _waitingForColor = false;
+        _currentPlayerIndex = 0;
+        _gameDirection = GameDirection.Clockwise;
+        _turnSkipped = false;
+
+        // Reset winner
+        _winner = null;
+    } 
 
 
     #endregion
