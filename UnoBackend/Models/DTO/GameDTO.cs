@@ -16,7 +16,7 @@ public class InitialDataDto
 
 public class DiscardPileDto
 {
-    public CardDto LastCardInDiscardPile { get; set; }
+    public CardDto? LastCardInDiscardPile { get; set; }
 }
 
 public class DeckDto
@@ -33,8 +33,8 @@ public class PlayerDto
 public class CardDto
 {
     public Guid Id { get; set; }
-    public string Color { get; set; }
-    public string Value { get; set; }
+    public string? Color { get; set; }
+    public string? Value { get; set; }
 }
 
 public class HandDto
@@ -44,8 +44,8 @@ public class HandDto
 
 public class PlayCardResponseDto
 {
-    public HandDto Hand { get; set; }
-    public DiscardPileDto DiscardPile { get; set; }
+    public HandDto? Hand { get; set; }
+    public DiscardPileDto? DiscardPile { get; set; }
     public bool GameWinner{get;set;}
 }
 
@@ -58,5 +58,5 @@ public class DrawResponseDto
 public class EndDto
 {
     public PlayerDto? Player {get; set;} = null;
-    public HandDto Hand {get; set;}
+    public HandDto? Hand {get; set;}
 }
