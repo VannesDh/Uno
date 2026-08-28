@@ -20,7 +20,7 @@ public class Game
     private Dictionary<IPlayer, List<ICard>> _cardInHand = new();
 
     private IDeck _deck;
-    private IDiscarded _discardedPile = new Discarded();
+    private IDiscarded _discardedPile;
 
     private GameDirection _gameDirection = GameDirection.Clockwise;
     private int _currentPlayerIndex;
@@ -33,7 +33,8 @@ public class Game
 
 
     public Game()
-    {
+    {   
+        _discardedPile = new Discarded();
         _deck = new Deck(InitializeCards());
         _currentPlayerIndex = 0;
 

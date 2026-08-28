@@ -46,7 +46,7 @@ public class PlayCardResponseDto
 {
     public HandDto? Hand { get; set; }
     public DiscardPileDto? DiscardPile { get; set; }
-    public bool GameWinner{get;set;}
+    public bool GameWinner { get; set; }
 }
 
 public class DrawResponseDto
@@ -57,6 +57,6 @@ public class DrawResponseDto
 
 public class EndDto
 {
-    public PlayerDto? Player {get; set;} = null;
-    public HandDto? Hand {get; set;}
+    public PlayerDto? Player { get; set; } = null;
+    public HandDto? Hand { get; set; }
 }
