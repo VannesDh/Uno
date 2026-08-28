@@ -33,7 +33,7 @@ public class Game
 
 
     public Game()
-    {   
+    {
         _discardedPile = new Discarded();
         _deck = new Deck(InitializeCards());
         _currentPlayerIndex = 0;
@@ -99,7 +99,6 @@ public class Game
                 _pendingDraw = 0;
             }
 
-            // Wild → first player chooses the color
             if (card.CardValue == CardValue.Wild)
             {
                 _waitingForColor = true;
@@ -111,16 +110,9 @@ public class Game
 
     public void RestartGame()
     {
-        // Reset deck
         _deck = new Deck(InitializeCards());
-
-        // Reset discard pile
         _discardedPile = new Discarded();
-
-        // Reset player hands
         _cardInHand.Clear();
-
-        // Reset UNO states
         _callUno.Clear();
 
         foreach (IPlayer player in _players)
@@ -140,23 +132,15 @@ public class Game
 
         // Reset winner
         _winner = null;
-    } 
+    }
     public void ResetGame()
-       {
-        // Reset deck
+    {
         _deck = new Deck(InitializeCards());
-
-        // Reset discard pile
         _discardedPile = new Discarded();
-
-        // Reset player hands
         _cardInHand.Clear();
-
-        // Reset UNO states
         _callUno.Clear();
-
         _players = new();
-        
+
         // Reset game state
         _pendingDraw = 0;
         _drawnCard = null;
@@ -169,7 +153,7 @@ public class Game
 
         // Reset winner
         _winner = null;
-    } 
+    }
 
 
     #endregion
@@ -546,24 +530,15 @@ public class Game
             return;
         }
 
-        // Keep the current top card
         ICard topCard = _discardedPile.DiscardedCards.Pop();
-
-        // Everything else goes back into deck
         List<ICard> cards = _discardedPile.DiscardedCards.ToList();
 
         Shuffle(cards);
 
-        // Reset discard pile
         _discardedPile.DiscardedCards = new Stack<ICard>();
-
         _discardedPile.DiscardedCards.Push(topCard);
-
-        // Create new deck
         _deck.DeckPiles = new Stack<ICard>(cards);
     }
-
-
     public ICard DrawCard(IPlayer player)
     {
         if (_deck.DeckPiles.Count == 0)
@@ -584,7 +559,6 @@ public class Game
 
         return card;
     }
-
 
     private void DistributeCards()
     {
