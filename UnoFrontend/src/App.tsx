@@ -21,18 +21,18 @@ function App() {
   const [mustPlayDrawnCard, setMustPlayDrawnCard] = useState(false);
 
   useEffect(() => {
-  const handleUnload = () => {
-    navigator.sendBeacon(
-      "http://localhost:5172/api/game/reset"
-    );
-  };
+    const handleUnload = () => {
+      navigator.sendBeacon(
+        "http://localhost:5172/api/game/reset"
+      );
+    };
 
-  window.addEventListener("beforeunload", handleUnload);
+    window.addEventListener("beforeunload", handleUnload);
 
-  return () => {
-    window.removeEventListener("beforeunload", handleUnload);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, []);
 
   // Handling play button
   const handlePlay = async () => {
@@ -55,26 +55,26 @@ function App() {
   };
 
   const handleMenu = async () => {
-  try {
-    await ResetGame();
+    try {
+      await ResetGame();
 
-    setGameStarted(false);
-    setGameWinner(false);
-    setHasDrawn(false);
-    setHasPlayed(false);
-    setPlayableCardIds([]);
-    setShowColorPicker(false);
-    setMustPlayDrawnCard(false);
+      setGameStarted(false);
+      setGameWinner(false);
+      setHasDrawn(false);
+      setHasPlayed(false);
+      setPlayableCardIds([]);
+      setShowColorPicker(false);
+      setMustPlayDrawnCard(false);
 
-    setDeck(null);
-    setTopPile(null);
-    setCurrentCards(null);
-    setCurrentPlayer(null);
-    setPlayers([]);
-  } catch (error) {
-    console.error(error);
-  }
-};
+      setDeck(null);
+      setTopPile(null);
+      setCurrentCards(null);
+      setCurrentPlayer(null);
+      setPlayers([]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleAddPlayer = async () => {
     if (!playerName.trim()) return;
@@ -131,64 +131,64 @@ function App() {
   }
 
   // handling drawing card
-const handleDraw = async () => {
-  try {
-    if (!hasDrawn && !hasPlayed) {
-      const data = await Draw();
+  const handleDraw = async () => {
+    try {
+      if (!hasDrawn && !hasPlayed) {
+        const data = await Draw();
 
-      setHasDrawn(true);
+        setHasDrawn(true);
 
-      setDeck(prev => ({
-        ...prev!,
-        cardCount: data.deckCount
-      }));
+        setDeck(prev => ({
+          ...prev!,
+          cardCount: data.deckCount
+        }));
 
-      setCurrentCards(prev => ({
-        ...prev!,
-        cards: [...prev!.cards, data.card]
-      }));
+        setCurrentCards(prev => ({
+          ...prev!,
+          cards: [...prev!.cards, data.card]
+        }));
 
-      const playableIds = await CheckPlayerCardPlayability();
+        const playableIds = await CheckPlayerCardPlayability();
 
-      if (playableIds.includes(data.card.id)) {
-        // Drawn card is playable → MUST play it
-        setPlayableCardIds([data.card.id]);
-        setMustPlayDrawnCard(true);
-      } else {
-        // Drawn card isn't playable → can end turn
-        setPlayableCardIds([]);
-        setMustPlayDrawnCard(false);
+        if (playableIds.includes(data.card.id)) {
+          // Drawn card is playable → MUST play it
+          setPlayableCardIds([data.card.id]);
+          setMustPlayDrawnCard(true);
+        } else {
+          // Drawn card isn't playable → can end turn
+          setPlayableCardIds(playableIds);
+          setMustPlayDrawnCard(false);
+        }
       }
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
-};
+  };
 
-const handlePlayAgain = async () => {
-  setShowColorPicker(false);
-  try {
-    const data = await RestartGame();
+  const handlePlayAgain = async () => {
+    setShowColorPicker(false);
+    try {
+      const data = await RestartGame();
 
-    setGameWinner(false);
-    setHasDrawn(false);
-    setHasPlayed(false);
-    setPlayableCardIds([]);
-    setDeck(data.deckCount);
-    setCurrentCards(data.hand);
-    setTopPile(data.discardPile);
-    setCurrentPlayer(data.player);
+      setGameWinner(false);
+      setHasDrawn(false);
+      setHasPlayed(false);
+      setPlayableCardIds([]);
+      setDeck(data.deckCount);
+      setCurrentCards(data.hand);
+      setTopPile(data.discardPile);
+      setCurrentPlayer(data.player);
 
-    if (data.waitingForColor) {
-      setShowColorPicker(true);
+      if (data.waitingForColor) {
+        setShowColorPicker(true);
+      }
+      const playableIds = await CheckPlayerCardPlayability();
+      setPlayableCardIds(playableIds);
+
+    } catch (error) {
+      console.error(error);
     }
-    const playableIds = await CheckPlayerCardPlayability();
-    setPlayableCardIds(playableIds);
-
-  } catch (error) {
-    console.error(error);
-  }
-};
+  };
 
   const handleChooseColor = async (color: string) => {
     try {
@@ -267,13 +267,7 @@ const handlePlayAgain = async () => {
           </span>
         </div>
 
-        <button
-          className="end-turn-btn"
-          onClick={handleEndTurn}
-          disabled={mustPlayDrawnCard}
-        >
-          END TURN
-        </button>
+
       </div>
       <Board
         deck={deck!}
@@ -287,10 +281,28 @@ const handlePlayAgain = async () => {
         cards={currentCards!}
         playableCardIds={playableCardIds}
       />
+      <div className="btm-button">
 
-     <button className="uno-btn" onClick={handleCallUno}>
-  UNO!
-</button>
+        <button
+          className="draw-button"
+          onClick={handleDraw}
+          disabled={hasDrawn}
+        >
+          DRAW
+        </button>
+        <button className="uno-btn" onClick={handleCallUno}>
+          UNO!
+        </button>
+
+        <button
+          className="end-turn-btn"
+          onClick={handleEndTurn}
+          disabled={mustPlayDrawnCard || (!hasDrawn && !hasPlayed)}
+        >
+          END TURN
+        </button>
+
+      </div>
       {showColorPicker && (
         <div className="color-picker-overlay">
           <div className="color-picker">

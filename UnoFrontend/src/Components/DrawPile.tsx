@@ -35,15 +35,6 @@ function DrawPile({ deck, onDraw, hasDrawn }: CardProps) {
           {deck.cardCount}
         </div>
       </div>
-
-      <button
-        className="draw-button"
-        onClick={onDraw}
-        disabled={hasDrawn}
-      >
-        DRAW
-      </button>
-
     </div>
   );
 }

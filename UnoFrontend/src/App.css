@@ -79,20 +79,23 @@ body {
    ========================================================= */
 
 .end-turn-btn {
-  padding: 9px 20px;
+  width: 95px;
+  height: 48px;
 
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
 
-  background: linear-gradient(135deg,
-      #ff3131,
-      #a90101);
+  background: linear-gradient(
+    135deg,
+    #ff3131,
+    #a90101
+  );
 
   color: white;
 
   font-family: inherit;
 
-  font-size: 12px;
+  font-size: 15px;
   font-weight: bold;
 
   letter-spacing: 1px;
@@ -100,24 +103,29 @@ body {
   cursor: pointer;
 
   box-shadow:
-    0 5px 12px rgba(0, 0, 0, 0.3);
+    0 5px 15px rgba(0, 0, 0, 0.3);
 
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
-
-.end-turn-btn:hover {
-  transform: translateY(-2px);
+.end-turn-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
 
   box-shadow:
-    0 7px 16px rgba(0, 0, 0, 0.4);
+    0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-
-.end-turn-btn:active {
+.end-turn-btn:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.end-turn-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: none;
 }
 
 .deck {
@@ -186,24 +194,28 @@ body {
 
 /* Draw Button */
 
+/* =========================
+   DRAW BUTTON
+   ========================= */
+
 .draw-button {
-  min-width: 95px;
 
-  padding: 8px 15px;
-
+width: 95px;
+  height: 48px;
   border: none;
+  border-radius: 10px;
 
-  border-radius: 8px;
-
-  background: linear-gradient(135deg,
-      #ff3131,
-      #a90101);
+  background: linear-gradient(
+    135deg,
+    #ff3131,
+    #a90101
+  );
 
   color: white;
 
   font-family: inherit;
 
-  font-size: 12px;
+  font-size: 15px;
   font-weight: bold;
 
   letter-spacing: 1px;
@@ -211,24 +223,38 @@ body {
   cursor: pointer;
 
   box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.3);
+    0 5px 15px rgba(0, 0, 0, 0.3);
 
-  transition: 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 
 .draw-button:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 
   box-shadow:
-    0 6px 15px rgba(0, 0, 0, 0.4);
+    0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
+
+.draw-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* =========================
+   DISABLED
+   ========================= */
 
 .draw-button:disabled {
   cursor: not-allowed;
 
-  opacity: 0.4;
+  opacity: 0.45;
+
+  box-shadow: none;
 }
 
 
@@ -284,9 +310,6 @@ body {
 
 .uno-btn {
   position: relative;
-
-  top: -12px;
-
   margin: 0;
 
   width: 95px;
@@ -972,4 +995,12 @@ body {
   .winner-buttons button {
     width: 100%;
   }
+}
+
+.btm-button{
+  display: flex;
+  flex-direction:row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
