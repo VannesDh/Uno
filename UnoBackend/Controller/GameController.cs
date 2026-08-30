@@ -284,11 +284,13 @@ public class GameController : ControllerBase
         {
             Cards = playerCards
         };
+        int lastPenalty = _game.GetLastDrawPenalty();
 
         return Ok(new EndDto
         {
             Player = current,
-            Hand = handDto
+            Hand = handDto,
+            DrawPenalty = lastPenalty,
         });
     }
 

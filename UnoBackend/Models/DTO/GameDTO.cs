@@ -59,4 +59,5 @@ public class EndDto
 {
     public PlayerDto? Player { get; set; } = null;
     public HandDto? Hand { get; set; }
+    public int DrawPenalty{get; set;}
 }

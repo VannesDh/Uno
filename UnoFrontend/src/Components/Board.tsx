@@ -15,6 +15,7 @@ interface BoardProps {
   onDraw: () => void;
   hasDrawn: boolean;
   onPlayCard: (card: CardDto) => void;
+  chosenColor: string;
 }
 
 function Board({
@@ -22,7 +23,8 @@ function Board({
   discardPile,
   onDraw,
   hasDrawn,
-  onPlayCard
+  onPlayCard,
+  chosenColor
 }: BoardProps) {
 
   const handleDragOver = (
@@ -54,10 +56,6 @@ function Board({
 
       <div className="pile-container">
 
-        {/* =========================
-            DRAW PILE
-           ========================= */}
-
         <div className="pile">
 
           <h3 className="pile-title">
@@ -71,11 +69,6 @@ function Board({
           />
 
         </div>
-
-
-        {/* =========================
-            DISCARD PILE
-           ========================= */}
 
         <div className="pile">
 
@@ -91,7 +84,11 @@ function Board({
 
             <DiscardPile
               color={
-                discardPile.lastCardInDiscardPile.color
+                chosenColor &&
+                  (discardPile.lastCardInDiscardPile.value === "Wild" ||
+                    discardPile.lastCardInDiscardPile.value === "PlusFour")
+                  ? chosenColor
+                  : discardPile.lastCardInDiscardPile.color
               }
               value={
                 discardPile.lastCardInDiscardPile.value

@@ -1,4 +1,5 @@
 import "./Card.css";
+import cardBack from "../Assets/PixelArtAssets-main/UnoCards/Card_Back.png";
 
 const cardImages = import.meta.glob(
   "../Assets/PixelArtAssets-main/UnoCards/*.png",
@@ -10,33 +11,51 @@ const cardImages = import.meta.glob(
 );
 
 interface CardProps {
-  id : string
+  id: string;
   color: string;
   value: string;
   playable: boolean;
-
+  isPlayerHidden: boolean;
 }
 
-function Card({id, color, value, playable }: CardProps) {
+function Card({
+  id,
+  color,
+  value,
+  playable,
+  isPlayerHidden
+}: CardProps) {
   const fileName = `${color}_${value}.png`;
   const imagePath = `../Assets/PixelArtAssets-main/UnoCards/${fileName}`;
 
   const image = cardImages[imagePath];
 
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
+    event.dataTransfer.effectAllowed = "move";
+
+    event.dataTransfer.setData(
+      "card",
+      JSON.stringify({
+        id,
+        color,
+        value
+      })
+    );
+  };
+
   return (
     <div
-      className={`card ${playable ? "playable" : "notPlayable"}`}
-      draggable
-      onDragStart={(event) => {
-        event.dataTransfer.setData(
-        "card",
-        JSON.stringify({
-          id,color,value
-        })
-      );
-      }}
+      className={`card ${
+        playable && !isPlayerHidden ? "playable" : "notPlayable"
+      }`}
+      draggable={playable && !isPlayerHidden}
+      onDragStart={handleDragStart}
     >
-      <img src={image} alt={`${color} ${value}`} />
+      <img
+        src={isPlayerHidden ? cardBack : image}
+        alt={`${color} ${value}`}
+        draggable={false}
+      />
     </div>
   );
 }

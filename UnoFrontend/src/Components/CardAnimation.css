@@ -1,0 +1,207 @@
+.discard-pile {
+  position: relative;
+}
+
+.discard-card {
+  display: block;
+}
+
+
+/* =========================
+   +2
+========================= */
+
+.animate-plus-two {
+  animation: plusTwo 0.5s ease;
+}
+
+@keyframes plusTwo {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+
+  40% {
+    transform: translateX(8px) rotate(3deg);
+  }
+
+  60% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+
+  80% {
+    transform: translateX(5px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+}
+
+
+/* =========================
+   +4
+========================= */
+
+.animate-plus-four {
+  animation: plusFour 0.7s ease;
+}
+
+@keyframes plusFour {
+  0% {
+    transform: scale(1) rotate(0);
+  }
+
+  20% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  40% {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  60% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  80% {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+
+/* =========================
+   Reverse
+========================= */
+
+.animate-reverse {
+  animation: reverseCard 0.7s ease;
+}
+
+@keyframes reverseCard {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================
+   Skip
+========================= */
+
+.animate-skip {
+  animation: skipCard 0.5s ease;
+}
+
+@keyframes skipCard {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateX(20px);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+
+.draw-animation {
+  animation: drawCard 0.4s ease;
+}
+
+@keyframes drawCard {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-8px) rotate(-3deg);
+  }
+
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+
+  75% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.draw-penalty-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  padding: 25px 45px;
+
+  background: rgba(0, 0, 0, 0.9);
+  border: 4px solid white;
+  border-radius: 15px;
+
+  text-align: center;
+
+  z-index: 1000;
+
+  pointer-events: none;
+
+  animation: drawPenaltyPopup 1.5s ease forwards;
+}
+
+.draw-penalty-number {
+  font-size: 64px;
+  font-weight: 900;
+}
+
+.draw-penalty-text {
+  margin-top: 5px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+@keyframes drawPenaltyPopup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}

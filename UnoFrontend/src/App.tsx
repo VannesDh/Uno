@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import Board from "./Components/Board";
 import { CheckPlayerCardPlayability, Draw, Play, PlayCard, ChooseColor, EndTurn, CallUno, AddPlayer, RestartGame, ResetGame } from "./Services/GameApi";
 import type { CardDto, DeckDto, DiscardPileDto, HandDto, PlayerDto } from "./Types/Game";
@@ -19,6 +20,11 @@ function App() {
   const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState("")
   const [mustPlayDrawnCard, setMustPlayDrawnCard] = useState(false);
+  const [isPlayerHidden, setIsPlayerHidden] = useState(true);
+  const [lastDrawPenalty, setLastDrawPenalty] = useState(0);
+  const [showDrawPenalty, setShowDrawPenalty] = useState(false);
+  const [chosenColour, setChosenColor] = useState("");
+  const [showUnoPopup, setShowUnoPopup] = useState(false);
 
   useEffect(() => {
     const handleUnload = () => {
@@ -133,7 +139,7 @@ function App() {
   // handling drawing card
   const handleDraw = async () => {
     try {
-      if (!hasDrawn && !hasPlayed) {
+      if (!hasDrawn && !hasPlayed && !isPlayerHidden) {
         const data = await Draw();
 
         setHasDrawn(true);
@@ -195,7 +201,7 @@ function App() {
       await ChooseColor(color);
 
       setShowColorPicker(false);
-
+      setChosenColor(color);
       const playableIds = await CheckPlayerCardPlayability();
       setPlayableCardIds(playableIds);
 
@@ -220,10 +226,26 @@ function App() {
 
         setHasDrawn(false);
         setHasPlayed(false);
+        setIsPlayerHidden(true);
+        setLastDrawPenalty(data.drawPenalty);
+
       }
 
     } catch (error) {
       console.error(error);
+    }
+  };
+  const handleReveal = () => {
+
+    setIsPlayerHidden(false);
+
+    if (lastDrawPenalty > 0) {
+      setShowDrawPenalty(true);
+
+      setTimeout(() => {
+        setShowDrawPenalty(false);
+        setLastDrawPenalty(0);
+      }, 2000);
     }
   };
 
@@ -252,6 +274,10 @@ function App() {
   const handleCallUno = async () => {
     try {
       await CallUno()
+       setShowUnoPopup(true);
+        setTimeout(() => {
+    setShowUnoPopup(false);
+  }, 1000);
     } catch (error) {
       console.error(error);
     }
@@ -275,24 +301,48 @@ function App() {
         onDraw={handleDraw}
         hasDrawn={hasDrawn}
         onPlayCard={handlePlayCard}
+        chosenColor={chosenColour}
       />
 
       <Hand
         cards={currentCards!}
         playableCardIds={playableCardIds}
+        isPlayerHidden={isPlayerHidden}
       />
+      {showUnoPopup && (
+  <motion.div
+    className="uno-popup"
+    initial={{ scale: 0, opacity: 0, rotate: -15 }}
+    animate={{
+      scale: [0, 1.3, 1],
+      opacity: 1,
+      rotate: [-15, 5, 0],
+    }}
+    exit={{ scale: 0, opacity: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    UNO!
+  </motion.div>
+)}
       <div className="btm-button">
 
         <button
           className="draw-button"
           onClick={handleDraw}
-          disabled={hasDrawn}
+          disabled={hasDrawn || hasPlayed}
         >
           DRAW
         </button>
-        <button className="uno-btn" onClick={handleCallUno}>
+        <motion.button className="uno-btn" 
+          whileTap={{
+          scale: 1.3,
+          rotate: [0, -10, 10, -5, 0],
+        }}
+          transition={{
+            duration: 0.4,
+          }} onClick={handleCallUno}>
           UNO!
-        </button>
+        </motion.button>
 
         <button
           className="end-turn-btn"
@@ -303,6 +353,26 @@ function App() {
         </button>
 
       </div>
+      {isPlayerHidden && (
+        <div className="reveal-container">
+          <p>Pass to {currentPlayer?.playerName}</p>
+
+          <button onClick={handleReveal}>
+            REVEAL
+          </button>
+        </div>
+      )}
+      {showDrawPenalty && lastDrawPenalty > 0 && (
+        <div className="draw-penalty-popup">
+          <div className="draw-penalty-number">
+            +{lastDrawPenalty}
+          </div>
+
+          <div className="draw-penalty-text">
+            DRAW {lastDrawPenalty} CARDS
+          </div>
+        </div>
+      )}
       {showColorPicker && (
         <div className="color-picker-overlay">
           <div className="color-picker">

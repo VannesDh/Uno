@@ -30,7 +30,7 @@ public class Game
 
     // Stores the winner after the callback is triggered
     private IPlayer? _winner;
-
+    private int _lastDrawPenalty;
 
     public Game()
     {
@@ -95,7 +95,7 @@ public class Game
                 {
                     DrawCard(_players[_currentPlayerIndex]);
                 }
-
+                _lastDrawPenalty = _pendingDraw;
                 _pendingDraw = 0;
             }
 
@@ -185,14 +185,17 @@ public class Game
 
 
     #region Discarding, Power Related, and Logic Checking
-
+    public int GetLastDrawPenalty()
+    {
+        return _lastDrawPenalty;
+    }
     public void PlayCard(ICard card)
     {
         if (!CheckCardPlayability(card))
             return;
 
         IPlayer player = _players[_currentPlayerIndex];
-
+        _lastDrawPenalty = 0;
         CheckPlayedCard(card);
 
         _cardInHand[player].Remove(card);
@@ -284,6 +287,7 @@ public class Game
     public void PlayerTurn(IPlayer player)
     {
         _drawnCard = null;
+
         if (!IsUno(player))
         {
             if (_callUno[player])
@@ -292,7 +296,7 @@ public class Game
                 _callUno[player] = false;
             }
         }
-        else if (IsUno(player))
+        else
         {
             if (!_callUno[player])
             {
@@ -301,15 +305,17 @@ public class Game
             }
         }
 
-        // Pending +2 / +4 draw
         if (_pendingDraw != 0)
         {
             for (int i = 0; i < _pendingDraw; i++)
             {
                 DrawCard(player);
             }
-
             _pendingDraw = 0;
+        }
+        else
+        {
+            _lastDrawPenalty = 0;
         }
     }
 
@@ -360,6 +366,7 @@ public class Game
         if (card.CardValue == CardValue.PlusTwo)
         {
             _pendingDraw = 2;
+            _lastDrawPenalty = _pendingDraw;
             return;
         }
 
@@ -367,6 +374,7 @@ public class Game
         if (card.CardValue == CardValue.PlusFour)
         {
             _pendingDraw = 4;
+            _lastDrawPenalty = _pendingDraw;
             _waitingForColor = true;
         }
 
@@ -574,6 +582,10 @@ public class Game
             }
 
             _cardInHand.Add(player, initialCard);
+
+            Console.WriteLine(
+                $"Distributed to {player.Name} | Hash: {player.GetHashCode()}"
+            );
         }
     }
 

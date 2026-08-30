@@ -5,9 +5,10 @@ import "./Hand.css";
 interface HandProps {
   cards : HandDto
   playableCardIds : string[]
+  isPlayerHidden : boolean
 }
 
-function Hand({ cards, playableCardIds }: HandProps) {
+function Hand({ cards, playableCardIds, isPlayerHidden}: HandProps) {
   return (
     <div className="hand">
       {cards.cards.map((card) => (
@@ -17,6 +18,7 @@ function Hand({ cards, playableCardIds }: HandProps) {
           color={card.color}
           value={card.value}
           playable={playableCardIds.includes(card.id)}
+          isPlayerHidden={isPlayerHidden}
         />
       ))}
     </div>
