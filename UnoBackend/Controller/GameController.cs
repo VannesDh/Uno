@@ -133,17 +133,9 @@ public class GameController : ControllerBase
             return BadRequest("Card cannot be played.");
         }
 
-        // PlayCard now uses the winner callback
         _game.PlayCard(actualCard);
-
-        // Get winner from the Game
+        
         IPlayer? winner = _game.GetWinner();
-
-        Console.WriteLine(
-            winner != null
-                ? $"The winner is {winner.Name}"
-                : "There is no winner yet"
-        );
 
         List<CardDto> playerCards = _game.GetPlayerCard(player)
             .Select(card => new CardDto

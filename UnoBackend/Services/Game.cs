@@ -6,7 +6,6 @@ namespace UnoBackend.Services;
 
 public class Game
 {
-    // Winner callback delegate
     public delegate void WinnerCallback(IPlayer player);
     private WinnerCallback? _winnerCallback;
 
@@ -21,14 +20,13 @@ public class Game
 
     private IDeck _deck;
     private IDiscarded _discardedPile;
-
+    private int _maxPlayer;
     private GameDirection _gameDirection = GameDirection.Clockwise;
     private int _currentPlayerIndex;
     private bool _turnSkipped = false;
 
     private Dictionary<IPlayer, bool> _callUno = new();
 
-    // Stores the winner after the callback is triggered
     private IPlayer? _winner;
     private int _lastDrawPenalty;
 
@@ -48,7 +46,6 @@ public class Game
     {
         if (_players.Count < 2)
         {
-            Console.WriteLine("Cannot start game");
             return;
         }
 
@@ -62,7 +59,6 @@ public class Game
         {
             ICard card = _deck.DeckPiles.Pop();
 
-            // Wild Draw Four cannot be the starting card
             if (card.CardValue == CardValue.PlusFour)
             {
                 _deck.DeckPiles.Push(card);
@@ -76,10 +72,8 @@ public class Game
                 continue;
             }
 
-            // Put the card into discard pile
             DiscardCard(card);
 
-            // Apply starting card effect
             if (card.CardValue == CardValue.Reverse ||
                 card.CardValue == CardValue.Skip ||
                 card.CardValue == CardValue.PlusTwo)
@@ -88,7 +82,7 @@ public class Game
 
                 if (_turnSkipped)
                 {
-                    NextPlayer(_turnSkipped);
+                    NextPlayer(false);
                 }
 
                 for (int i = 0; i < _pendingDraw; i++)
@@ -120,7 +114,6 @@ public class Game
             _callUno[player] = false;
         }
 
-        // Reset game state
         _pendingDraw = 0;
         _drawnCard = null;
         _hasStart = false;
@@ -130,7 +123,6 @@ public class Game
         _gameDirection = GameDirection.Clockwise;
         _turnSkipped = false;
 
-        // Reset winner
         _winner = null;
     }
     public void ResetGame()
@@ -141,7 +133,6 @@ public class Game
         _callUno.Clear();
         _players = new();
 
-        // Reset game state
         _pendingDraw = 0;
         _drawnCard = null;
         _hasStart = false;
@@ -151,7 +142,6 @@ public class Game
         _gameDirection = GameDirection.Clockwise;
         _turnSkipped = false;
 
-        // Reset winner
         _winner = null;
     }
 
@@ -170,8 +160,6 @@ public class Game
     private void OnWinner(IPlayer player)
     {
         _winner = player;
-
-        Console.WriteLine($"WINNER: {player.Name}");
     }
 
 
@@ -200,7 +188,6 @@ public class Game
 
         _cardInHand[player].Remove(card);
 
-        // The forced drawn card has now been played
         _drawnCard = null;
 
         if (!_waitingForColor)
@@ -208,7 +195,6 @@ public class Game
             _chosenColor = null;
         }
 
-        // Check winner
         if (CheckIfWinner(player))
         {
             _winnerCallback?.Invoke(player);
@@ -258,8 +244,6 @@ public class Game
 
     public bool CheckCardPlayability(ICard card)
     {
-        // If the player drew a playable card,
-        // that card is the only card they can play.
         if (_drawnCard != null && card.Id != _drawnCard.Id)
         {
             return false;
@@ -292,7 +276,8 @@ public class Game
         {
             if (_callUno[player])
             {
-                DrawCard(player);
+                _pendingDraw += 1;
+                _lastDrawPenalty= _pendingDraw;
                 _callUno[player] = false;
             }
         }
@@ -300,7 +285,8 @@ public class Game
         {
             if (!_callUno[player])
             {
-                DrawCard(player);
+                _pendingDraw += 1;
+                _lastDrawPenalty= _pendingDraw;
                 _callUno[player] = false;
             }
         }
@@ -309,7 +295,7 @@ public class Game
         {
             for (int i = 0; i < _pendingDraw; i++)
             {
-                DrawCard(player);
+                DrawCard(player, true);
             }
             _pendingDraw = 0;
         }
@@ -317,6 +303,7 @@ public class Game
         {
             _lastDrawPenalty = 0;
         }
+        _callUno[player] = false;
     }
 
 
@@ -365,7 +352,7 @@ public class Game
 
         if (card.CardValue == CardValue.PlusTwo)
         {
-            _pendingDraw = 2;
+            _pendingDraw += 2;
             _lastDrawPenalty = _pendingDraw;
             return;
         }
@@ -373,7 +360,7 @@ public class Game
 
         if (card.CardValue == CardValue.PlusFour)
         {
-            _pendingDraw = 4;
+            _pendingDraw += 4;
             _lastDrawPenalty = _pendingDraw;
             _waitingForColor = true;
         }
@@ -391,7 +378,6 @@ public class Game
         return _waitingForColor;
     }
 
-
     public void ChooseColor(Color color)
     {
         if (!_waitingForColor)
@@ -402,29 +388,23 @@ public class Game
         _waitingForColor = false;
     }
 
-
     public void EndTurn()
     {
         NextPlayer(_turnSkipped);
     }
-
 
     public ICard GetCurrentTopPile()
     {
         return _discardedPile.DiscardedCards.Peek();
     }
 
-
     public bool IsUno(IPlayer player)
     {
         return _cardInHand[player].Count == 1;
     }
 
-
     public void CallUno(IPlayer player)
     {
-        Console.WriteLine($"Player {player.Name} called UNO");
-
         _callUno[player] = true;
     }
 
@@ -436,13 +416,14 @@ public class Game
 
     public void AddPlayer(string name)
     {
-        Player newPlayer = new(name);
+        if(!(_players.Count() == 5))
+        {
+            Player newPlayer = new(name);
 
-        _players.Add(newPlayer);
+            _players.Add(newPlayer);
 
-        _callUno.Add(newPlayer, false);
-
-        Console.WriteLine($"Player Added {name}");
+            _callUno.Add(newPlayer, false);
+        }
     }
 
 
@@ -451,18 +432,11 @@ public class Game
         return _cardInHand[player].ToList();
     }
 
-
     public IPlayer GetCurrentPlayer()
     {
         IPlayer player = _players[_currentPlayerIndex];
-
-        Console.WriteLine($"Current player: {player.Name}");
-        Console.WriteLine($"Player object: {player.GetHashCode()}");
-
         return player;
     }
-
-
     #endregion
 
 
@@ -476,12 +450,12 @@ public class Game
         {
             foreach (CardValue value in Enum.GetValues<CardValue>())
             {
-                // Colored cards
+              
                 if (color != Color.Wild &&
                     value != CardValue.PlusFour &&
                     value != CardValue.Wild)
                 {
-                    // Only one Zero per color
+                   
                     if (value == CardValue.Zero)
                     {
                         cards.Add(new Card(color, value));
@@ -493,7 +467,7 @@ public class Game
                     }
                 }
 
-                // Wild cards
+              
                 else if (color == Color.Wild &&
                          (value == CardValue.Wild ||
                           value == CardValue.PlusFour))
@@ -547,7 +521,7 @@ public class Game
         _discardedPile.DiscardedCards.Push(topCard);
         _deck.DeckPiles = new Stack<ICard>(cards);
     }
-    public ICard DrawCard(IPlayer player)
+    public ICard DrawCard(IPlayer player, bool isPenalty = false)
     {
         if (_deck.DeckPiles.Count == 0)
         {
@@ -558,9 +532,8 @@ public class Game
 
         _cardInHand[player].Add(card);
 
-        // If the drawn card is playable,
-        // this becomes the only card the player can play.
-        if (CheckCardPlayability(card))
+        
+        if (!isPenalty && CheckCardPlayability(card))
         {
             _drawnCard = card;
         }
@@ -582,10 +555,6 @@ public class Game
             }
 
             _cardInHand.Add(player, initialCard);
-
-            Console.WriteLine(
-                $"Distributed to {player.Name} | Hash: {player.GetHashCode()}"
-            );
         }
     }
 

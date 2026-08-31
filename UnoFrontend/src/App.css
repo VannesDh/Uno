@@ -344,6 +344,12 @@ width: 95px;
     background 0.15s ease;
 }
 
+.uno-btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 
 .uno-btn:hover {
   background: #d90000;
