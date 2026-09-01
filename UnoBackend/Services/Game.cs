@@ -12,18 +12,17 @@ public class Game
     private int _pendingDraw = 0;
     private ICard? _drawnCard = null;
     private bool _hasStart = false;
-    private Color? _chosenColor = null;
-    private bool _waitingForColor = false;
+    internal Color? _chosenColor = null;
+    internal bool _waitingForColor = false;
 
-    private List<IPlayer> _players = [];
-    private Dictionary<IPlayer, List<ICard>> _cardInHand = new();
-
-    private IDeck _deck;
-    private IDiscarded _discardedPile;
+    internal List<IPlayer> _players = [];
+    internal Dictionary<IPlayer, List<ICard>> _cardInHand = new();
+    internal IDeck _deck;
+    internal IDiscarded _discardedPile;
     private int _maxPlayer;
-    private GameDirection _gameDirection = GameDirection.Clockwise;
+    internal GameDirection _gameDirection = GameDirection.Clockwise;
     private int _currentPlayerIndex;
-    private bool _turnSkipped = false;
+    internal bool _turnSkipped = false;
 
     private Dictionary<IPlayer, bool> _callUno = new();
 
@@ -101,49 +100,48 @@ public class Game
         }
     }
 
-
-    public void RestartGame()
-    {
-        _deck = new Deck(InitializeCards());
-        _discardedPile = new Discarded();
-        _cardInHand.Clear();
-        _callUno.Clear();
-
-        foreach (IPlayer player in _players)
+        public void RestartGame()
         {
-            _callUno[player] = false;
+            _deck = new Deck(InitializeCards());
+            _discardedPile = new Discarded();
+            _cardInHand.Clear();
+            _callUno.Clear();
+
+            foreach (IPlayer player in _players)
+            {
+                _callUno[player] = false;
+            }
+
+            _pendingDraw = 0;
+            _drawnCard = null;
+            _hasStart = false;
+            _chosenColor = null;
+            _waitingForColor = false;
+            _currentPlayerIndex = 0;
+            _gameDirection = GameDirection.Clockwise;
+            _turnSkipped = false;
+
+            _winner = null;
         }
+        public void ResetGame()
+        {
+            _deck = new Deck(InitializeCards());
+            _discardedPile = new Discarded();
+            _cardInHand.Clear();
+            _callUno.Clear();
+            _players = new();
 
-        _pendingDraw = 0;
-        _drawnCard = null;
-        _hasStart = false;
-        _chosenColor = null;
-        _waitingForColor = false;
-        _currentPlayerIndex = 0;
-        _gameDirection = GameDirection.Clockwise;
-        _turnSkipped = false;
+            _pendingDraw = 0;
+            _drawnCard = null;
+            _hasStart = false;
+            _chosenColor = null;
+            _waitingForColor = false;
+            _currentPlayerIndex = 0;
+            _gameDirection = GameDirection.Clockwise;
+            _turnSkipped = false;
 
-        _winner = null;
-    }
-    public void ResetGame()
-    {
-        _deck = new Deck(InitializeCards());
-        _discardedPile = new Discarded();
-        _cardInHand.Clear();
-        _callUno.Clear();
-        _players = new();
-
-        _pendingDraw = 0;
-        _drawnCard = null;
-        _hasStart = false;
-        _chosenColor = null;
-        _waitingForColor = false;
-        _currentPlayerIndex = 0;
-        _gameDirection = GameDirection.Clockwise;
-        _turnSkipped = false;
-
-        _winner = null;
-    }
+            _winner = null;
+        }
 
 
     #endregion
@@ -277,7 +275,7 @@ public class Game
             if (_callUno[player])
             {
                 _pendingDraw += 1;
-                _lastDrawPenalty= _pendingDraw;
+                _lastDrawPenalty = _pendingDraw;
                 _callUno[player] = false;
             }
         }
@@ -286,7 +284,7 @@ public class Game
             if (!_callUno[player])
             {
                 _pendingDraw += 1;
-                _lastDrawPenalty= _pendingDraw;
+                _lastDrawPenalty = _pendingDraw;
                 _callUno[player] = false;
             }
         }
@@ -309,6 +307,8 @@ public class Game
 
     public void DiscardCard(ICard card)
     {
+        if (card == null)
+            return;
         _discardedPile.DiscardedCards.Push(card);
     }
 
@@ -372,7 +372,6 @@ public class Game
         }
     }
 
-
     public bool WaitingForColor()
     {
         return _waitingForColor;
@@ -416,7 +415,7 @@ public class Game
 
     public void AddPlayer(string name)
     {
-        if(!(_players.Count() == 5))
+        if (!(_players.Count() == 5))
         {
             Player newPlayer = new(name);
 
@@ -450,12 +449,12 @@ public class Game
         {
             foreach (CardValue value in Enum.GetValues<CardValue>())
             {
-              
+
                 if (color != Color.Wild &&
                     value != CardValue.PlusFour &&
                     value != CardValue.Wild)
                 {
-                   
+
                     if (value == CardValue.Zero)
                     {
                         cards.Add(new Card(color, value));
@@ -467,7 +466,7 @@ public class Game
                     }
                 }
 
-              
+
                 else if (color == Color.Wild &&
                          (value == CardValue.Wild ||
                           value == CardValue.PlusFour))
@@ -532,7 +531,7 @@ public class Game
 
         _cardInHand[player].Add(card);
 
-        
+
         if (!isPenalty && CheckCardPlayability(card))
         {
             _drawnCard = card;
