@@ -1,41 +1,59 @@
 using UnoBackend.Controller;
 using UnoBackend.Services;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "logs/uno-.log",
+        rollingInterval: RollingInterval.Day
+    )
+    .CreateLogger();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<Game>();
-
-
-builder.Services.AddCors(options =>
+try
 {
-    options.AddPolicy("ReactPolicy", policy =>
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog();
+
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddControllers();
+    builder.Services.AddSwaggerGen();
+    builder.Services.AddSingleton<Game>();
+
+    builder.Services.AddCors(options =>
     {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        options.AddPolicy("ReactPolicy", policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
     });
-});
 
-var app = builder.Build();
-app.UseCors("ReactPolicy");
-app.MapControllers();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSerilogRequestLogging();
+
+    app.UseCors("ReactPolicy");
+    app.MapControllers();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.Run();
+    Log.Information("UNO backend started");
 }
-
-
-// app.UseHttpsRedirection();
-
-
-app.Run();
-
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

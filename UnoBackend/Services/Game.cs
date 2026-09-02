@@ -1,6 +1,8 @@
+using Serilog;
 using UnoBackend.Interfaces;
 using UnoBackend.Models;
 using UnoBackend.Models.Enum;
+using Microsoft.Extensions.Logging;
 
 namespace UnoBackend.Services;
 
@@ -25,16 +27,16 @@ public class Game
     internal bool _turnSkipped = false;
 
     private Dictionary<IPlayer, bool> _callUno = new();
-
+    private readonly ILogger<Game> _logger;
     private IPlayer? _winner;
     private int _lastDrawPenalty;
 
-    public Game()
+    public Game(ILogger<Game> logger)
     {
         _discardedPile = new Discarded();
         _deck = new Deck(InitializeCards());
         _currentPlayerIndex = 0;
-
+        _logger = logger;
         SetWinnerCallback(OnWinner);
     }
 
@@ -45,6 +47,7 @@ public class Game
     {
         if (_players.Count < 2)
         {
+            _logger.LogCritical("Not Enough Player");
             return;
         }
 
@@ -100,48 +103,48 @@ public class Game
         }
     }
 
-        public void RestartGame()
+    public void RestartGame()
+    {
+        _deck = new Deck(InitializeCards());
+        _discardedPile = new Discarded();
+        _cardInHand.Clear();
+        _callUno.Clear();
+
+        foreach (IPlayer player in _players)
         {
-            _deck = new Deck(InitializeCards());
-            _discardedPile = new Discarded();
-            _cardInHand.Clear();
-            _callUno.Clear();
-
-            foreach (IPlayer player in _players)
-            {
-                _callUno[player] = false;
-            }
-
-            _pendingDraw = 0;
-            _drawnCard = null;
-            _hasStart = false;
-            _chosenColor = null;
-            _waitingForColor = false;
-            _currentPlayerIndex = 0;
-            _gameDirection = GameDirection.Clockwise;
-            _turnSkipped = false;
-
-            _winner = null;
+            _callUno[player] = false;
         }
-        public void ResetGame()
-        {
-            _deck = new Deck(InitializeCards());
-            _discardedPile = new Discarded();
-            _cardInHand.Clear();
-            _callUno.Clear();
-            _players = new();
 
-            _pendingDraw = 0;
-            _drawnCard = null;
-            _hasStart = false;
-            _chosenColor = null;
-            _waitingForColor = false;
-            _currentPlayerIndex = 0;
-            _gameDirection = GameDirection.Clockwise;
-            _turnSkipped = false;
+        _pendingDraw = 0;
+        _drawnCard = null;
+        _hasStart = false;
+        _chosenColor = null;
+        _waitingForColor = false;
+        _currentPlayerIndex = 0;
+        _gameDirection = GameDirection.Clockwise;
+        _turnSkipped = false;
 
-            _winner = null;
-        }
+        _winner = null;
+    }
+    public void ResetGame()
+    {
+        _deck = new Deck(InitializeCards());
+        _discardedPile = new Discarded();
+        _cardInHand.Clear();
+        _callUno.Clear();
+        _players = new();
+
+        _pendingDraw = 0;
+        _drawnCard = null;
+        _hasStart = false;
+        _chosenColor = null;
+        _waitingForColor = false;
+        _currentPlayerIndex = 0;
+        _gameDirection = GameDirection.Clockwise;
+        _turnSkipped = false;
+
+        _winner = null;
+    }
 
 
     #endregion
@@ -177,10 +180,21 @@ public class Game
     }
     public void PlayCard(ICard card)
     {
-        if (!CheckCardPlayability(card))
-            return;
 
         IPlayer player = _players[_currentPlayerIndex];
+        if (!CheckCardPlayability(card))
+        {
+            _logger.LogWarning(
+               "Player {PlayerName} attempted to play invalid card {Color} {CardValue}",
+               player.Name,
+               card.Color,
+               card.CardValue
+           );
+
+            return;
+        }
+
+
         _lastDrawPenalty = 0;
         CheckPlayedCard(card);
 
@@ -193,8 +207,19 @@ public class Game
             _chosenColor = null;
         }
 
+        _logger.LogInformation(
+       "Player {PlayerName} played {Color} {CardValue}",
+       player.Name,
+       card.Color,
+       card.CardValue
+   );
+
         if (CheckIfWinner(player))
         {
+            _logger.LogInformation(
+            "Player {PlayerName} won the game",
+            player.Name
+        );
             _winnerCallback?.Invoke(player);
         }
     }
@@ -217,8 +242,15 @@ public class Game
             % _players.Count;
 
         _turnSkipped = false;
+        IPlayer nextPlayer = _players[_currentPlayerIndex];
 
-        PlayerTurn(_players[_currentPlayerIndex]);
+        _logger.LogInformation(
+            "Turn changed to {PlayerName}. Skipped: {Skipped}",
+            nextPlayer.Name,
+            skipped
+        );
+
+        PlayerTurn(nextPlayer);
     }
 
 
@@ -330,10 +362,21 @@ public class Game
 
     private void SpecialCardPlayed(ICard card)
     {
+        _logger.LogInformation(
+        "Special card played: {Color} {CardValue}",
+        card.Color,
+        card.CardValue
+    );
         if (card.CardValue == CardValue.Reverse)
         {
             if (_gameDirection == GameDirection.Clockwise)
             {
+                _logger.LogInformation(
+                "Game direction changed to CounterClockwise"
+            );
+                _logger.LogInformation(
+                "Game direction changed to Clockwise"
+            );
                 _gameDirection = GameDirection.CounterClockwise;
                 return;
             }
@@ -345,6 +388,9 @@ public class Game
 
         if (card.CardValue == CardValue.Skip)
         {
+            _logger.LogInformation(
+            "Next player will be skipped"
+        );
             _turnSkipped = true;
             return;
         }
@@ -353,6 +399,10 @@ public class Game
         if (card.CardValue == CardValue.PlusTwo)
         {
             _pendingDraw += 2;
+            _logger.LogInformation(
+            "Pending draw penalty increased to {Penalty}",
+            _pendingDraw
+        );
             _lastDrawPenalty = _pendingDraw;
             return;
         }
@@ -361,6 +411,10 @@ public class Game
         if (card.CardValue == CardValue.PlusFour)
         {
             _pendingDraw += 4;
+            _logger.LogInformation(
+           "Plus Four played. Pending draw: {Penalty}. Waiting for color.",
+           _pendingDraw
+       );
             _lastDrawPenalty = _pendingDraw;
             _waitingForColor = true;
         }
@@ -368,22 +422,37 @@ public class Game
 
         if (card.CardValue == CardValue.Wild)
         {
+            _logger.LogInformation(
+            "Wild card played. Waiting for color."
+        );
             _waitingForColor = true;
         }
     }
 
     public bool WaitingForColor()
     {
+
         return _waitingForColor;
     }
 
     public void ChooseColor(Color color)
     {
         if (!_waitingForColor)
+        {
+            _logger.LogWarning(
+            "Attempted to choose color {Color} when game was not waiting for a color",
+            color
+        );
             return;
 
-        _chosenColor = color;
+        }
 
+
+        _chosenColor = color;
+        _logger.LogInformation(
+              "Color chosen: {Color}",
+              color
+          );
         _waitingForColor = false;
     }
 
@@ -404,7 +473,12 @@ public class Game
 
     public void CallUno(IPlayer player)
     {
+
         _callUno[player] = true;
+        _logger.LogInformation(
+      "Player {PlayerName} called UNO",
+      player.Name
+  );
     }
 
 
@@ -524,17 +598,32 @@ public class Game
     {
         if (_deck.DeckPiles.Count == 0)
         {
+            _logger.LogInformation(
+                "Deck is empty. Renewing deck."
+            );
+
             RenewDeck();
         }
 
         ICard card = _deck.DeckPiles.Pop();
 
         _cardInHand[player].Add(card);
-
+        _logger.LogInformation(
+                "Player {PlayerName} drew {Color} {CardValue}. Penalty: {IsPenalty}",
+                player.Name,
+                card.Color,
+                card.CardValue,
+                isPenalty
+            );
 
         if (!isPenalty && CheckCardPlayability(card))
         {
+            _logger.LogInformation(
+            "Drawn card {CardId} is playable",
+            card.Id
+        );
             _drawnCard = card;
+
         }
 
         return card;
