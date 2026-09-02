@@ -1,9 +1,12 @@
 using UnoBackend.Controller;
 using UnoBackend.Services;
 using Serilog;
+using UnoBackend.Interfaces;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", Serilog.Events.LogEventLevel.Information)
     .WriteTo.Console()
     .WriteTo.File(
         "logs/uno-.log",
@@ -20,7 +23,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen();
-    builder.Services.AddSingleton<Game>();
+    builder.Services.AddSingleton<IGame, Game>();
 
     builder.Services.AddCors(options =>
     {
@@ -35,7 +38,7 @@ try
 
     var app = builder.Build();
 
-    app.UseSerilogRequestLogging();
+    // app.UseSerilogRequestLogging();
 
     app.UseCors("ReactPolicy");
     app.MapControllers();

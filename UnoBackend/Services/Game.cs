@@ -619,8 +619,10 @@ public class Game : IGame
         if (!isPenalty && CheckCardPlayability(card))
         {
             _logger.LogInformation(
-            "Drawn card {CardId} is playable",
-            card.Id
+            "Drawn card {CardId} with attribute {Color} {CardValue} is playable",
+            card.Id,
+            card.Color,
+            card.CardValue
         );
             _drawnCard = card;
 
