@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace UnoBackend.Services;
 
-public class Game
+public class Game : IGame
 {
     public delegate void WinnerCallback(IPlayer player);
     private WinnerCallback? _winnerCallback;

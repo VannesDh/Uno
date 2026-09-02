@@ -11,9 +11,9 @@ namespace UnoBackend.Controller;
 [Route("api/game")]
 public class GameController : ControllerBase
 {
-    private readonly Game _game;
+    private readonly IGame _game;
 
-    public GameController(Game game)
+    public GameController(IGame game)
     {
         _game = game;
     }

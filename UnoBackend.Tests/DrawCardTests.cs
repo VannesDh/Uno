@@ -1,6 +1,7 @@
 using UnoBackend.Services;
 using UnoBackend.Interfaces;
 using UnoBackend.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace UnoBackend.Tests;
 
@@ -10,7 +11,7 @@ public class DrawCardTests
     public void DrawCard_PlayerReceivesCard()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -29,7 +30,7 @@ public class DrawCardTests
     [Test]
     public void DrawCard_EmptyDeck_RenewDeck()
     {
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -53,7 +54,7 @@ public class DrawCardTests
     public void DrawCard_Penalty_PlayerReceivesCard()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -72,7 +73,7 @@ public class DrawCardTests
     public void DrawCard_ReturnsDrawnCard()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");

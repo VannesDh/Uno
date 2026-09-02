@@ -1,5 +1,6 @@
 using UnoBackend.Services;
 using UnoBackend.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
 
 
 public class NextTurnTests
@@ -10,7 +11,7 @@ public class NextTurnTests
 public void NextPlayer_NotSkipped_MovesToNextPlayer()
 {
     // Arrange
-    Game game = new Game();
+    Game game = new Game(NullLogger<Game>.Instance);
 
     game.AddPlayer("Player 1");
     game.AddPlayer("Player 2");
@@ -33,7 +34,7 @@ public void NextPlayer_NotSkipped_MovesToNextPlayer()
 public void NextPlayer_Skipped_SkipsNextPlayer()
 {
     // Arrange
-    Game game = new Game();
+    Game game = new Game(NullLogger<Game>.Instance);
 
     game.AddPlayer("Player 1");
     game.AddPlayer("Player 2");
@@ -56,7 +57,7 @@ public void NextPlayer_Skipped_SkipsNextPlayer()
 public void NextPlayer_WhenAtLastPlayer_WrapsAround()
 {
     // Arrange
-    Game game = new Game();
+    Game game = new Game(NullLogger<Game>.Instance);
 
     game.AddPlayer("Player 1");
     game.AddPlayer("Player 2");

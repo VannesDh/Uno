@@ -1,5 +1,6 @@
 using UnoBackend.Services;
 using UnoBackend.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace UnoBackend.Tests;
 
@@ -8,7 +9,7 @@ public class DiscardTests
     [Test]
     public void DiscardCard_AddsCardToTheDiscardPile()
     {
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
         game.Play();
@@ -27,7 +28,7 @@ public class DiscardTests
     [Test]
     public void DiscardCard_NullCard_DoesNotAddCard()
     {
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.DiscardCard(null!);
 

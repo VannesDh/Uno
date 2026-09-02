@@ -3,14 +3,14 @@ using UnoBackend.Services;
 using UnoBackend.Interfaces;
 using UnoBackend.Models;
 using UnoBackend.Models.Enum;
-
+using Microsoft.Extensions.Logging.Abstractions;
 public class ChooseColorTests
 {
     [Test]
     public void ChooseColor_WhenWaitingForColor_SetsChosenColor()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -39,7 +39,7 @@ public class ChooseColorTests
     public void ChooseColor_WhenNotWaitingForColor_DoesNothing()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -57,7 +57,7 @@ public class ChooseColorTests
     public void ChooseColor_WhenWaitingForColor_CanChooseWild()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");

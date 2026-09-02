@@ -2,6 +2,7 @@ using UnoBackend.Services;
 using UnoBackend.Interfaces;
 using UnoBackend.Models.Enum;
 using UnoBackend.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 
 public class PlayCardTests
 {
@@ -11,7 +12,7 @@ public class PlayCardTests
     public void CheckPlayableCard_PlayerHasPlayableCards_ReturnsPlayableCardIds()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -42,7 +43,7 @@ public class PlayCardTests
     public void CheckPlayableCard_NoPlayableCards_ReturnsEmptyList()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -72,7 +73,7 @@ public class PlayCardTests
     public void CheckPlayableCard_PlayerHasNoCards_ReturnsEmptyList()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -95,7 +96,7 @@ public class PlayCardTests
     public void PlayCard_Reverse_ChangesDirection()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -125,7 +126,7 @@ public class PlayCardTests
     public void PlayCard_Reverse_WhenCounterClockwise_ChangesToClockwise()
     {
         // Arrangez
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -164,7 +165,7 @@ public class PlayCardTests
     public void PlayCard_Skip_SetsTurnSkipped()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -190,7 +191,7 @@ public class PlayCardTests
     public void PlayCard_PlusTwo_AddsTwoToPendingDraw()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -217,7 +218,7 @@ public class PlayCardTests
     public void PlayCard_PlusFour_AddsFourToPendingDraw_AndWaitsForColor()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -246,7 +247,7 @@ public class PlayCardTests
     public void PlayCard_Wild_WaitsForColor()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");

@@ -3,6 +3,7 @@ using UnoBackend.Services;
 using UnoBackend.Interfaces;
 using UnoBackend.Models.Enum;
 using UnoBackend.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace UnoBackend.Tests;
 
@@ -14,7 +15,7 @@ public class GameStateTests
     public void RestartGame_KeepsPlayers()
     {
         // Arrange
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -34,7 +35,7 @@ public class GameStateTests
     public void RestartGame_ClearsPlayerHands()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -59,7 +60,7 @@ public class GameStateTests
     public void RestartGame_CanAddNewPlayersWithoutRemovingExistingPlayers()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -82,7 +83,7 @@ public class GameStateTests
     public void ResetGame_RemovesAllPlayers()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -99,7 +100,7 @@ public class GameStateTests
     public void ResetGame_ClearsPlayerHands()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
@@ -123,7 +124,7 @@ public class GameStateTests
     public void ResetGame_CanAddPlayersAgain()
     {
         // Arrange
-        Game game = new Game();
+        Game game =  new Game(NullLogger<Game>.Instance);
 
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");

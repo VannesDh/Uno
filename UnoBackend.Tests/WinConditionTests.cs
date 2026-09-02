@@ -2,6 +2,7 @@ using UnoBackend.Services;
 using UnoBackend.Interfaces;
 using UnoBackend.Models;
 using UnoBackend.Models.Enum;
+using Microsoft.Extensions.Logging.Abstractions;
 
 
 namespace UnoBackend.Tests;
@@ -11,7 +12,7 @@ public class WinConditionTest
     [Test]
     public void UnoCalled_PlayerIsUno_NoDraw()
     {
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
         game.Play();
@@ -33,7 +34,7 @@ public class WinConditionTest
     [Test]
     public void UnoCalled_PlayerIsNotUno_Draw()
     {
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
         game.Play();
@@ -51,7 +52,7 @@ public class WinConditionTest
        [Test]
     public void UnoNotCalled_PlayerIsUno_Draw()
     {
-        Game game = new Game();
+        Game game = new Game(NullLogger<Game>.Instance);
         game.AddPlayer("Player 1");
         game.AddPlayer("Player 2");
         game.Play();
@@ -75,7 +76,7 @@ public class WinConditionTest
 public void GetWinner_NoWinner_ReturnsNull()
 {
     // Arrange
-    Game game = new Game();
+    Game game = new Game(NullLogger<Game>.Instance);
 
     // Act
     IPlayer? winner = game.GetWinner();
@@ -89,7 +90,7 @@ public void GetWinner_NoWinner_ReturnsNull()
 public void SetWinnerCallback_CallbackIsCalled_WhenWinnerIsTriggered()
 {
     // Arrange
-    Game game = new Game();
+    Game game = new Game(NullLogger<Game>.Instance);
 
     game.AddPlayer("Player 1");
     game.AddPlayer("Player 2");
@@ -126,7 +127,7 @@ public void SetWinnerCallback_CallbackIsCalled_WhenWinnerIsTriggered()
 public void WinnerCallback_SetsWinner_WhenPlayerHasNoCards()
 {
     // Arrange
-    Game game = new Game();
+    Game game = new Game(NullLogger<Game>.Instance);
 
     game.AddPlayer("Player 1");
     game.AddPlayer("Player 2");
